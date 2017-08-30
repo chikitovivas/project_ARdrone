@@ -1,0 +1,160 @@
+def followBottom(center_x, center_y):
+#def followBottom(center_x, center_y, speed):
+    #Variables adicionales
+    global TIMESLEEP
+    screenMidX = W/2
+    screenMidY = H/2
+    diff = H/7
+    # Calculo de la direccion del objeto a detectar
+    centerThresh = 50                                   # El diametro del centro de la camara
+
+    # En el eje de las x (Horizontal) -> Note: Inverse
+    if (screenMidX-center_x) < -centerThresh:                  # Si el objeto esta a la derecha del centro
+        drone.moveRight()
+        drone.stop()
+        time.sleep(TIMESLEEP)
+        #drone.moveRight(speed)
+        print "Derecha"
+    if (screenMidX-center_x) > centerThresh:                   # Si el objeto esta a la izquierda del centro
+        drone.moveLeft()
+        drone.stop()
+        time.sleep(TIMESLEEP)
+        #drone.moveLeft(speed)
+        print "Izquierda"
+    if -centerThresh < (screenMidX-center_x) < centerThresh:   # Si el objeto esta en el centro
+        #drone.hover()
+        drone.stop()
+        time.sleep(TIMESLEEP)
+        pass
+        print "Detener (Izquierda - Derecha)"
+
+    # En el eje de las Y (Vertical)
+    if (screenMidY-center_y) < -centerThresh:                  # Si el objeto esta por debajo del centro
+        drone.moveBackward()
+        drone.stop()
+        time.sleep(TIMESLEEP)
+        #drone.moveBackward(speed)
+        print("Hacia atras")
+    if (screenMidY-center_y) > centerThresh:                   # Si el objeto esta por encima del centro
+        drone.moveForward()
+        drone.stop()
+        time.sleep(TIMESLEEP)
+        #drone.moveForward(speed)
+        print("Hacia adelante")
+    if -centerThresh < (screenMidY-center_y) < centerThresh:
+        #drone.hover()
+        drone.stop()
+        time.sleep(TIMESLEEP)
+        pass
+        print "Detener (Al frente - Atras)"
+
+def followFront(center_x, center_y):
+#def followFront(center_x, center_y, speed):
+    #Variables adicionales
+    global TIMESLEEP
+    screenMidX = W/2
+    screenMidY = H/2
+    diff = H/7
+    # Calculo de la direccion del objeto a detectar
+    centerThresh = 50                                   # El diametro del centro de la camara
+
+    # En el eje de las x (Horizontal) -> Note: Inverse
+    if (screenMidX-center_x) < -centerThresh:                  # Si el objeto esta a la derecha del centro
+        drone.moveRight()
+        #time.sleep(TIME)
+        drone.stop()
+        #drone.moveRight(speed)
+        print "Derecha"
+    if (screenMidX-center_x) > centerThresh:                   # Si el objeto esta a la izquierda del centro
+        drone.moveLeft()
+        #time.sleep(1)
+        drone.stop()
+        #drone.moveLeft(speed)
+        print "Izquierda"
+    if -centerThresh < (screenMidX-center_x) < centerThresh:   # Si el objeto esta en el centro
+        drone.hover()
+        #drone.stot()
+        pass
+        print "Detener movimiento horizontal"
+
+    # En el eje de las Y (Vertical)
+    if (screenMidY-center_y) < -centerThresh:                  # Si el objeto esta por debajo del centro
+        drone.moveDown()
+        #time.sleep(1)
+        drone.stop()
+        #drone.moveDown(speed)
+        print("Abajo")
+    if (screenMidY-center_y) > centerThresh:                   # Si el objeto esta por encima del centro
+        drone.moveUp()
+        #time.sleep(1)
+        drone.stop()
+        #drone.moveUp(speed)
+        print("Arriba")
+    if -centerThresh < (screenMidY-center_y) < centerThresh:
+        drone.hover()
+        #drone.stop()
+        pass
+        print "Detener movimiento vertical"
+
+def followFront(center_x, center_y):
+
+    #EJE DE LAS X
+    if (G.SCREENMIDX - G.RADIUSCENTER) < center_x < (G.SCREENMIDX + G.RADIUSCENTER):   # Si el objeto esta en el centro
+        if(G.IN_MOVEMENT) and (not G.STOP_X):
+            G.DRONE.stop()
+            G.IN_MOVEMENT = False
+            G.STOP_X = True
+            G.FLAG_MOVEMENT = 0
+        print "DETENER (Izquierda - Derecha)"
+    elif G.STOP_Y:
+        G.STOP_X = False
+        G.STOP_Y = True
+
+    if (not G.STOP_X) and (G.STOP_Y) and (not G.IN_MOVEMENT):
+        # En el eje de las x (Horizontal) -> Note: Inverse
+        if center_x > (G.SCREENMIDX + G.RADIUSCENTER):                  # Si el objeto esta a la derecha del centro
+            G.DRONE.moveRight()
+            G.IN_MOVEMENT = True
+            G.FLAG_MOVEMENT = 1
+        elif center_x < (G.SCREENMIDX - G.RADIUSCENTER):                   # Si el objeto esta a la izquierda del centro
+            G.DRONE.moveLeft()
+            G.IN_MOVEMENT = True
+            G.FLAG_MOVEMENT = 2
+
+    #EJE DE LAS Y
+    if (G.SCREENMIDY - G.RADIUSCENTER) < center_y < (G.SCREENMIDY + G.RADIUSCENTER):   # Si el objeto esta en el centro
+        if(G.IN_MOVEMENT) and (not G.STOP_Y):
+            G.DRONE.stop()
+            G.IN_MOVEMENT = False
+            G.STOP_Y = True
+            G.FLAG_MOVEMENT = 0
+        print "DETENER (Arriba-Abajo)"
+    elif G.STOP_X:
+        G.STOP_X = True
+        G.STOP_Y = False
+
+    if (not G.STOP_Y) and (G.STOP_X) and (not G.IN_MOVEMENT):
+        # En el eje de las Y (Vertical)
+        if center_y < (G.SCREENMIDY - G.RADIUSCENTER):                  # Si el objeto esta por Arriba del centro
+            G.DRONE.moveUp()
+            G.IN_MOVEMENT = True
+            G.FLAG_MOVEMENT = 3
+
+        elif center_y > (G.SCREENMIDY + G.RADIUSCENTER):                   # Si el objeto esta por debajo del centro
+            G.DRONE.moveDown()
+            G.IN_MOVEMENT = True
+            G.FLAG_MOVEMENT = 4
+
+    if G.FLAG_MOVEMENT == 1:
+        print("DERECHA")
+    elif G.FLAG_MOVEMENT == 2:
+        print("IZQUIERDA")
+    elif G.FLAG_MOVEMENT == 3:
+        print("HACIA ARRIBA")
+    elif G.FLAG_MOVEMENT == 4:
+        print("HACIA ABAJO")
+    elif G.FLAG_MOVEMENT == 0:
+        print("NO HAY MOVIMIENTO")
+
+    G.LAST_X = center_x
+    G.LAST_Y = center_y
