@@ -2,6 +2,7 @@
                                 ############# IMPORTS ################
                                 ######################################
 import time, sys
+import threading
 sys.path.append('/home/chikitovivas/Descargas/Python-control-dron')
 sys.path.append('/home/chikitovivas/Descargas/Python-control-dron/drone/libs')
 sys.path.append('/home/chikitovivas/Descargas/Python-control-dron/drone/libs/XboxController')
@@ -48,6 +49,15 @@ def init():
 
     global STEP
     STEP = 0
+
+    global vision_var
+    vision_var = False
+    global XY_locking
+    XY_locking = threading.Lock()
+    global XY
+    XY = (0,0)
+    global notFound
+    notFound = False
 
 
 def init_drone():

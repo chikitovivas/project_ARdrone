@@ -102,7 +102,7 @@ def controller(automatic):
         return automatic                                    #Retorna valor de automatic
 
 def draw(frame, gray):
-    roundel = G.ROUNDEL.detectMultiScale(gray, 1.25, 50, 0, (20,20))
+    roundel = G.ROUNDEL.detectMultiScale(gray, 1.20, 50, 0, (20,20))
     #Video = 1.31
     #Video1 = 1.25
     #Video2 = 1.37
@@ -159,68 +159,61 @@ def drawLine(frame, gray):
         return (frame,center,1)
     return (frame,None,0)
 
+
 def followBottom(center_x, center_y):
-#def followBottom(center_x, center_y, speed):
+    doneHorizontal = False
+    doneVertical = False
+    timeS = 2
 
     #EJE DE LAS X
     if (G.SCREENMIDX - G.RADIUSCENTER) < center_x < (G.SCREENMIDX + G.RADIUSCENTER):   # Si el objeto esta en el centro
-        if(G.IN_MOVEMENT) and (not G.STOP_X):
-            G.DRONE.stop()
-            G.IN_MOVEMENT = False
-            G.STOP_X = True
-            G.FLAG_MOVEMENT = 0
+        G.DRONE.stop()
+        G.FLAG_MOVEMENT = 0
+        doneHorizontal = True
         print "DETENER (Izquierda - Derecha)"
-    elif G.STOP_Y:
-        G.STOP_X = False
-        G.STOP_Y = True
 
-    if (not G.STOP_X) and (G.STOP_Y) and (not G.IN_MOVEMENT):
-        # En el eje de las x (Horizontal) -> Note: Inverse
-        if center_x > (G.SCREENMIDX + G.RADIUSCENTER):                  # Si el objeto esta a la derecha del centro
-            G.DRONE.moveRight()
-            G.IN_MOVEMENT = True
-            G.FLAG_MOVEMENT = 1
-        elif center_x < (G.SCREENMIDX - G.RADIUSCENTER):                   # Si el objeto esta a la izquierda del centro
-            G.DRONE.moveLeft()
-            G.IN_MOVEMENT = True
-            G.FLAG_MOVEMENT = 2
+    # En el eje de las x (Horizontal) -> Note: Inverse
+    elif center_x > (G.SCREENMIDX + G.RADIUSCENTER):                  # Si el objeto esta a la derecha del centro
+        G.DRONE.moveRight()
+        time.sleep(timeS)
+        G.DRONE.stop()
+        G.FLAG_MOVEMENT = 1
 
-    """print("IN MOVEMENT: " + str(G.IN_MOVEMENT))
-    print("G.STOP_X: " + str(G.STOP_X))
-    print("G.STOP_Y: " + str(G.STOP_Y))
-    print("G.FLAG_MOVEMENT: " + str(G.FLAG_MOVEMENT))
-    print("-------------------------")"""
-
-    #EJE DE LAS Y
-    if (G.SCREENMIDY - G.RADIUSCENTER) < center_y < (G.SCREENMIDY + G.RADIUSCENTER):   # Si el objeto esta en el centro
-        if(G.IN_MOVEMENT) and (not G.STOP_Y):
-            G.DRONE.stop()
-            G.IN_MOVEMENT = False
-            G.STOP_Y = True
-            G.FLAG_MOVEMENT = 0
-        print "DETENER (Adelante - Atras)"
-    elif G.STOP_X:
-        G.STOP_X = True
-        G.STOP_Y = False
-
-    if (not G.STOP_Y) and (G.STOP_X) and (not G.IN_MOVEMENT):
-        # En el eje de las Y (Vertical)
-        if center_y < (G.SCREENMIDY - G.RADIUSCENTER):                  # Si el objeto esta por debajo del centro
-            G.DRONE.moveForward()
-            G.IN_MOVEMENT = True
-            G.FLAG_MOVEMENT = 3
-
-        elif center_y > (G.SCREENMIDY + G.RADIUSCENTER):                   # Si el objeto esta por encima del centro
-            G.DRONE.moveBackward()
-            G.IN_MOVEMENT = True
-            G.FLAG_MOVEMENT = 4
+    elif center_x < (G.SCREENMIDX - G.RADIUSCENTER):                   # Si el objeto esta a la izquierda del centro
+        G.DRONE.moveLeft()
+        time.sleep(timeS)
+        G.DRONE.stop()
+        G.FLAG_MOVEMENT = 2
 
     if G.FLAG_MOVEMENT == 1:
         print("DERECHA")
     elif G.FLAG_MOVEMENT == 2:
         print("IZQUIERDA")
-    elif G.FLAG_MOVEMENT == 3:
-        print("HACIA ADELANTE")
+    elif G.FLAG_MOVEMENT == 0:
+        print("NO HAY MOVIMIENTO")
+
+    #EJE DE LAS Y
+    if (G.SCREENMIDY - G.RADIUSCENTER) < center_y < (G.SCREENMIDY + G.RADIUSCENTER):   # Si el objeto esta en el centro
+        G.DRONE.stop()
+        G.FLAG_MOVEMENT = 0
+        doneVertical = True
+        print "DETENER (Al frente - Hacia atras)"
+
+    # En el eje de las Y (Vertical)
+    elif center_y < (G.SCREENMIDY - G.RADIUSCENTER):                  # Si el objeto esta por Arriba del centro
+        G.DRONE.moveUp()
+        time.sleep(timeS)
+        G.DRONE.stop()
+        G.FLAG_MOVEMENT = 3
+
+    elif center_y > (G.SCREENMIDY + G.RADIUSCENTER):                   # Si el objeto esta por debajo del centro
+        G.DRONE.moveDown()
+        time.sleep(timeS)
+        G.DRONE.stop()
+        G.FLAG_MOVEMENT = 4
+
+    if G.FLAG_MOVEMENT == 3:
+        print("HACIA EL FRENTE")
     elif G.FLAG_MOVEMENT == 4:
         print("HACIA ATRAS")
     elif G.FLAG_MOVEMENT == 0:
@@ -229,11 +222,9 @@ def followBottom(center_x, center_y):
     G.LAST_X = center_x
     G.LAST_Y = center_y
 
-    """print("IN MOVEMENT: " + str(G.IN_MOVEMENT))
-    print("G.STOP_X: " + str(G.STOP_X))
-    print("G.STOP_Y: " + str(G.STOP_Y))
-    print("G.FLAG_MOVEMENT: " + str(G.FLAG_MOVEMENT))
-    print("-------------------------")"""
+    #Cambio de funcionalidad
+    if(doneVertical and doneHorizontal):
+        G.STEP = 1
 
 def stopMovementBottom():
 
@@ -265,6 +256,8 @@ def stopMovementBottom():
 
         print("Buscando...")
         print("======================")
+    else:
+        print("NUNCA HE DETECTADO ALGO")
 
 def stopMovementFront():
 
@@ -383,7 +376,7 @@ def followFront(center_x, center_y):
     if(doneVertical and doneHorizontal):
         G.STEP = 1
 
-def followLine(center_x, center_y):
+#def followLine(center_x, center_y):
 
 
 def timePass(flagTime,seconds):
