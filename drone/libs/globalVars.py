@@ -32,7 +32,7 @@ def init():
     global FLAG_LEFTX,FLAG_LEFTY,FLAG_RIGHTX,FLAG_RIGHTY        # Banderas
     FLAG_LEFTX,FLAG_LEFTY,FLAG_RIGHTX,FLAG_RIGHTY = False,False,False,False
     global FLAG_MOVEMENT                                        # Bandera de movimiento
-    FLAG_MOVEMENT = 0
+    FLAG_MOVEMENT = -1
     #
     global JOY                                                  # El control de xbox
     JOY = xbox.Joystick()
@@ -58,6 +58,12 @@ def init():
     XY = (0,0)
     global notFound
     notFound = False
+
+    global H_MIN,H_MAX,S_MIN,S_MAX,V_MIN,V_MAX
+    H_MIN,H_MAX,S_MIN,S_MAX,V_MIN,V_MAX = 32, 100, 40, 200, 20, 220
+
+    global H_MIN_T,H_MAX_T,S_MIN_T,S_MAX_T,V_MIN_T,V_MAX_T
+    H_MIN_T,H_MAX_T,S_MIN_T,S_MAX_T,V_MIN_T,V_MAX_T = 100, 220, 165, 215, 140, 255
 
 
 def init_drone():

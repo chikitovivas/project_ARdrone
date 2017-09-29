@@ -29,9 +29,10 @@ def run():
     acum_y = 0
     cantidad = 0
     once = True
+    kernel = np.ones((5,5),np.uint8)
 
     #cap = cv2.VideoCapture(0)
-    cap = cv2.VideoCapture("Videos/Video3.avi")
+    cap = cv2.VideoCapture("Videos/Video8.avi")
     #Mientras no se mande a parar
     while not stop :
         flagTime,seconds = F.timePass(flagTime,seconds)
@@ -42,21 +43,33 @@ def run():
             if not(frameFirst is None):
                 _,frameFirst = cap.read()
                 frame = cv2.resize(frameFirst, (G.W, G.H))      #Cambiar tamano al frame
-                # Conversion de los frames a tono de grises
-                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  #Gris al frame
-                #test
-                blurred = cv2.GaussianBlur(gray, (5, 5), 0)     #Filtro
-                _,tresh = cv2.threshold(blurred, 150, 255, cv2.THRESH_BINARY)    #Filtro de blanco y negro
-                cv2.imshow("tresh", tresh)                      #Se muestra el filtro blanco y negro
-                # Creacion de los circulos de velocidad
-                for i in range(1, 5):
-                    cv2.circle(frame, (G.SCREENMIDX, G.SCREENMIDY), G.DIFF*i,(0,0,255),2) ##(,(),G.RADIUSCENTER,(),)
-
+                #G.STEP = 0
                 if G.STEP == 0:
-                    frame,center,flag = F.draw(frame,tresh)         #Se manda a dibujar sobre el objeto detectado
-                #elif G.STEP == 1:
-                    #frame,center,flag = F.drawLine(frame,tresh)         #Se manda a dibujar sobre el objeto detectado
+                    frame = cv2.resize(frame,(G.W,G.H))
+                    HSV = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+                    mask = cv2.inRange(HSV, np.array([G.H_MIN_T,G.S_MIN_T,G.V_MIN_T]), np.array([G.H_MAX_T,G.S_MAX_T,G.V_MAX_T]))
+                    output = cv2.bitwise_and(frame, frame, mask = mask)
 
+                    gray = cv2.cvtColor(output, cv2.COLOR_BGR2GRAY)
+                    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+                    _,tresh = cv2.threshold(blurred, 30, 255, cv2.THRESH_BINARY)    #Filtro de blanco y negro
+                    #erode = cv2.erode(tresh, kernel, iterations=2)
+                    dilate = cv2.dilate(tresh, kernel, iterations=8)
+
+                    frame,center,flag = F.draw(frame,dilate)         #Se manda a dibujar sobre el objeto detectado
+                elif G.STEP == 1:
+                    HSV = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+                    mask = cv2.inRange(HSV, np.array([G.H_MIN,G.S_MIN,G.V_MIN]), np.array([G.H_MAX,G.S_MAX,G.V_MAX]))
+                    output = cv2.bitwise_and(frame, frame, mask = mask)
+
+                    gray = cv2.cvtColor(output, cv2.COLOR_BGR2GRAY)
+                    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+                    _,tresh = cv2.threshold(blurred, 30, 255, cv2.THRESH_BINARY)    #Filtro de blanco y negro
+                    erode = cv2.erode(tresh, kernel, iterations=2)
+                    dilate = cv2.dilate(erode, kernel, iterations=5)
+
+                    frame,center,flag = F.drawLine(frame,dilate)         #Se manda a dibujar sobre el objeto detectado
+                    #flagTime = True
                 #Si se detecta algo
                 if flag:
                     # Centro del objeto
@@ -74,29 +87,17 @@ def run():
                         once = True
 
                     #Funcion para movimientos del dron con respecto al objeto detectadoq
-                    if (automatic and flagTime):
-                        if ((x1 > prom_x - 30) and (x1 < prom_x + 30)) and ((y1 > prom_y - 30) and (y1 < prom_y + 30)):
-                            if G.STEP == 0:
-                                with G.XY_locking:
-                                    G.XY = (prom_x,prom_y)
-                                    G.vision_var = True
-                            elif G.STEP == 1:
-                                #Seguimiento de la linea, reconocimiento
-                                G.DRONE.stop()
-                                G.DRONE.turnAngle(-180,0.5,1)
-                                G.DRONE.land()
+                    if (automatic):
+                        with G.XY_locking:
+                            G.XY = (x1,y1)
+                            G.vision_var = True
 
                         cantidad = 0
                         acum_x = 0
                         acum_y = 0
-                    elif automatic and not flagTime:
-                        prom_x,prom_y = F.promediar(acum_x,acum_y,cantidad)
                     once = False
                 else:
-                    if automatic and flagTime:
-                        if cantidad > 0:
-                            G.LAST_X = prom_x
-                            G.LAST_Y = prom_y
+                    if automatic:
                         G.notFound = True
                     if not once:
                         print("NO DETECTA OBJETO")
@@ -120,6 +121,11 @@ def run():
                     print("----------------------------------")
                 # Muestra imagen
                 cv2.imshow("DRONE", frame)
+                #cv2.imshow("DRONE-tresh", tresh)
+                #cv2.imshow("DRONE-erode", erode)
+                #cv2.imshow("DRONE-dilate", dilate)
+                #cv2.imshow("DRONE-GRAY", tresh)
+                print(str(G.STEP))
             else:
                 if(waiting == 0):
                     print("Esperando...")

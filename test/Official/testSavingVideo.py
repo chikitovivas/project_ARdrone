@@ -1,7 +1,7 @@
 import time, sys
 sys.path.append('/home/chikitovivas/Descargas/Python-control-dron')
-sys.path.append('/home/chikitovivas/Descargas/Python-control-dron/test/Official/XboxController')
-import numpy as np
+sys.path.append('/home/chikitovivas/Descargas/Python-control-dron/drone/libs/XboxController')
+import numpy as nptest
 import cv2
 import ps_drone
 import xbox
@@ -36,7 +36,6 @@ CDC = drone.ConfigDataCount                                 # Resincronizar el d
 drone.startVideo()                                          # Empezar la funcion de video
 
 CODEC = cv2.cv.CV_FOURCC('D','I','V','X') # MPEG-4 = MPEG-1
-
 #Xbox Controller
 joy = xbox.Joystick()
 W, H = 640, 360
@@ -54,11 +53,11 @@ def savingVideo():
     #cap = cv2.VideoCapture(0)
     #cap = cv2.VideoCapture("Video.avi")
     # Define the codec and create VideoWriter object
-    out = cv2.VideoWriter('Video.avi',CODEC, 60.0, (640,360))
-    out1 = cv2.VideoWriter('Video1.avi',CODEC, 60.0, (640,360))
-    out2 = cv2.VideoWriter('Video2.avi',CODEC, 60.0, (640,360))
-    out3 = cv2.VideoWriter('Video3.avi',CODEC, 60.0, (640,360))
-    out4 = cv2.VideoWriter('Video4.avi',CODEC, 60.0, (640,360))
+    out = cv2.VideoWriter('Video5.avi',CODEC, 60.0, (640,360))
+    out1 = cv2.VideoWriter('Video6.avi',CODEC, 60.0, (640,360))
+    out2 = cv2.VideoWriter('Video7.avi',CODEC, 60.0, (640,360))
+    out3 = cv2.VideoWriter('Video8.avi',CODEC, 60.0, (640,360))
+    out4 = cv2.VideoWriter('Video9.avi',CODEC, 60.0, (640,360))
     while not stop :
         automatic = controller(automatic)
         if joy.A():
@@ -118,13 +117,15 @@ def savingVideo():
 
 def showingVideo():
     stop = False
-    cap = cv2.VideoCapture("Video.avi")
+    cap = cv2.VideoCapture("Video6.avi")
 
     while not stop :
         try:
             _,frameFirst = cap.read()
             if not(frameFirst is None):
                 cv2.imshow("Drone", frameFirst)
+            else:
+                stop = True
 
         except Exception as e:
             print "Error: " + str(e)

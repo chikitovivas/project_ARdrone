@@ -22,7 +22,10 @@ def controller():
     while(running):
         if G.vision_var:
             with G.XY_locking:
-                F.followBottom(G.XY[0],G.XY[1])
+                if(G.STEP == 0):
+                    F.followBottom(G.XY[0],G.XY[1])
+                elif(G.STEP == 1):
+                    F.followLineSpin(G.XY[0],G.XY[1])  
                 G.XY = (0,0)
                 G.vision_var = False
             once = False
