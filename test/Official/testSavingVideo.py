@@ -53,11 +53,12 @@ def savingVideo():
     #cap = cv2.VideoCapture(0)
     #cap = cv2.VideoCapture("Video.avi")
     # Define the codec and create VideoWriter object
-    out = cv2.VideoWriter('Video5.avi',CODEC, 60.0, (640,360))
-    out1 = cv2.VideoWriter('Video6.avi',CODEC, 60.0, (640,360))
-    out2 = cv2.VideoWriter('Video7.avi',CODEC, 60.0, (640,360))
-    out3 = cv2.VideoWriter('Video8.avi',CODEC, 60.0, (640,360))
-    out4 = cv2.VideoWriter('Video9.avi',CODEC, 60.0, (640,360))
+    out = cv2.VideoWriter('Video3.avi',CODEC, 60.0, (640,360))
+    out1 = cv2.VideoWriter('Video4.avi',CODEC, 60.0, (640,360))
+    out2 = cv2.VideoWriter('Video5.avi',CODEC, 60.0, (640,360))
+    out3 = cv2.VideoWriter('Video6.avi',CODEC, 60.0, (640,360))
+    out4 = cv2.VideoWriter('Video7.avi',CODEC, 60.0, (640,360))
+    #.0.avi',CODEC, 60.0, (640,360))
     while not stop :
         automatic = controller(automatic)
         if joy.A():

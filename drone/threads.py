@@ -18,20 +18,42 @@ running = True
 def controller():
     once = False
     global running
+    automatic = False
+    """G.DRONE.takeoff()
+    time.sleep(5)
+    G.DRONE.mtrim()
+    while G.activation == False or G.DRONE.State[0] == 0:
+        var = 2"""
+        #print "..."
+    #Loop hasta que encuentre el objeto
+    print "--------------------------"
+    print "     BUSCANDO OBJETO      "
+    print "--------------------------"
 
+    """while not G.firstFind:
+        print "Waiting first find"
+        time.sleep(3)
+"""
     while(running):
-        if G.vision_var:
-            with G.XY_locking:
-                if(G.STEP == 0):
-                    F.followBottom(G.XY[0],G.XY[1])
-                elif(G.STEP == 1):
-                    F.followLineSpin(G.XY[0],G.XY[1])  
-                G.XY = (0,0)
-                G.vision_var = False
+        automatic = F.controller(automatic)
+        if G.vision_var and automatic:
+            if(G.STEP == 0):
+                F.followBottom()
+            elif(G.STEP == 1):
+                print("ENTRA F")
+                F.followLineSpin()
             once = False
-        elif G.notFound:
-            F.stopMovementBottom()
+        elif G.notFound and automatic:
+            if G.STEP == 0:
+                F.stopMovementBottom()
+            if G.STEP == 1:
+                G.DRONE.land() #prueba
             G.notFound = False
+        else:
+            var = 2
+            #print("AUTOMATIC: " + str(automatic))
+
+        if G.JOY.Back():   running =   False
 
     print("Terminando hilo de control....")
 

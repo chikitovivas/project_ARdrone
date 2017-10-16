@@ -17,36 +17,32 @@ import functions as F
 #out = cv2.VideoWriter('output.avi',CODEC, 10.0, (640,480))
 G.init()
 def run():
-    #G.DRONE.takeoff()
     #Variables adicionales
     waiting = 0
     stop =   False
-    ground = False
-    automatic = True
     flagTime = False
     seconds = time.localtime().tm_sec
-    acum_x = 0
-    acum_y = 0
-    cantidad = 0
     once = True
     kernel = np.ones((5,5),np.uint8)
 
     #cap = cv2.VideoCapture(0)
-    cap = cv2.VideoCapture("Videos/Video8.avi")
+    cap = cv2.VideoCapture("Videos/Video6.avi")
     #Mientras no se mande a parar
     while not stop :
+        #time.sleep(0.01)
         flagTime,seconds = F.timePass(flagTime,seconds)
-        automatic = F.controller(automatic)                     #Valor de automatic, cuando se da el boton START, cambia el valor
         try:
             # Leyendo frames del video del dron
             frameFirst = G.DRONE.VideoImage                     #Leyendo frames del dron
             if not(frameFirst is None):
+                G.activation = True
                 _,frameFirst = cap.read()
                 frame = cv2.resize(frameFirst, (G.W, G.H))      #Cambiar tamano al frame
                 #G.STEP = 0
                 if G.STEP == 0:
                     frame = cv2.resize(frame,(G.W,G.H))
                     HSV = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+                    #MARCA
                     mask = cv2.inRange(HSV, np.array([G.H_MIN_T,G.S_MIN_T,G.V_MIN_T]), np.array([G.H_MAX_T,G.S_MAX_T,G.V_MAX_T]))
                     output = cv2.bitwise_and(frame, frame, mask = mask)
 
@@ -55,49 +51,68 @@ def run():
                     _,tresh = cv2.threshold(blurred, 30, 255, cv2.THRESH_BINARY)    #Filtro de blanco y negro
                     #erode = cv2.erode(tresh, kernel, iterations=2)
                     dilate = cv2.dilate(tresh, kernel, iterations=8)
-
                     frame,center,flag = F.draw(frame,dilate)         #Se manda a dibujar sobre el objeto detectado
+
+                    #LINEA
+                    mask = cv2.inRange(HSV, np.array([G.H_MIN,G.S_MIN,G.V_MIN]), np.array([G.H_MAX,G.S_MAX,G.V_MAX]))
+                    output = cv2.bitwise_and(frame, frame, mask = mask)
+
+                    blurred = cv2.GaussianBlur(output, (5, 5), 0)
+
+                    erode = cv2.erode(blurred, kernel, iterations=2)
+                    dilate = cv2.dilate(erode, kernel, iterations=5)
+
+                    gray = cv2.cvtColor(dilate, cv2.COLOR_BGR2GRAY)
+                    _,tresh = cv2.threshold(gray, 60, 255, cv2.THRESH_BINARY)    #Filtro de blanco y negro
+
+                    array_tresh = [tresh[(G.H/3):2*(G.H/3),0:G.W],tresh[0:(G.H/3),0:G.W]]
+
+                    frame,center_line,flag_line = F.drawLine(frame,array_tresh)         #Se manda a dibujar sobre el objeto detectado
                 elif G.STEP == 1:
                     HSV = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
                     mask = cv2.inRange(HSV, np.array([G.H_MIN,G.S_MIN,G.V_MIN]), np.array([G.H_MAX,G.S_MAX,G.V_MAX]))
                     output = cv2.bitwise_and(frame, frame, mask = mask)
 
-                    gray = cv2.cvtColor(output, cv2.COLOR_BGR2GRAY)
-                    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-                    _,tresh = cv2.threshold(blurred, 30, 255, cv2.THRESH_BINARY)    #Filtro de blanco y negro
-                    erode = cv2.erode(tresh, kernel, iterations=2)
+                    blurred = cv2.GaussianBlur(output, (5, 5), 0)
+
+                    erode = cv2.erode(blurred, kernel, iterations=2)
                     dilate = cv2.dilate(erode, kernel, iterations=5)
 
-                    frame,center,flag = F.drawLine(frame,dilate)         #Se manda a dibujar sobre el objeto detectado
+                    gray = cv2.cvtColor(dilate, cv2.COLOR_BGR2GRAY)
+                    _,tresh = cv2.threshold(gray, 60, 255, cv2.THRESH_BINARY)    #Filtro de blanco y negro
+
+                    array_tresh = [tresh[(G.H/3):2*(G.H/3),0:G.W],tresh[0:(G.H/3),0:G.W]]
+
+                    frame,array_center_line,flag = F.drawLine(frame,array_tresh)         #Se manda a dibujar sobre el objeto detectado
                     #flagTime = True
                 #Si se detecta algo
                 if flag:
-                    # Centro del objeto
-                    x1 = center[0]
-                    y1 = center[1]
-
-                    acum_x += x1
-                    acum_y += y1
-                    cantidad += 1
-
-                    if flagTime:
-                        print("X: " + str(x1))
-                        print("Y: " + str(y1))
-                        print("---------------")
-                        once = True
+                    """if(G.firstFind == False):
+                        G.firstFind = True
+                        automatic = True"""
 
                     #Funcion para movimientos del dron con respecto al objeto detectadoq
-                    if (automatic):
-                        with G.XY_locking:
-                            G.XY = (x1,y1)
-                            G.vision_var = True
 
-                        cantidad = 0
-                        acum_x = 0
-                        acum_y = 0
+                    with G.XY_locking:
+                        if G.STEP == 0:
+                            G.XY_mark = (center[0],center[1])
+                            G.LAST_X_mark = center[0]
+                            G.LAST_Y_mark = center[1]
+                            if flag_line:
+                                G.XY_line = (center_line[0],center_line[1])
+                                G.LAST_X_line = center_line[0]
+                                G.LAST_Y_line = center_line[1]
+                        elif G.STEP == 1:
+                            print ("ENTRA STEP 1")
+                            G.XY_line = array_center_line
+
+                        G.vision_var = True
+                        G.notFound = False
                     once = False
                 else:
-                    if automatic:
+                    if G.notFoundActivation:
+                        if G.STEP == 0: #prueba
+                            G.vision_var = False
                         G.notFound = True
                     if not once:
                         print("NO DETECTA OBJETO")
@@ -105,7 +120,7 @@ def run():
 
                 # Estatus de la bateria
                 bat = G.DRONE.getBattery()[0]
-                if flagTime:
+                """if flagTime:
                     print "Bateria: " + str(bat)
                     if automatic:
                         print("Modo: Automatico!")
@@ -113,19 +128,24 @@ def run():
                         print("Modo: MANUAL")
                     print("----------------------------------")
                     print("----------------------------------")
+                    print("Viento: OK" if G.DRONE.State[20] == 0 else "Viento: MUCHO VIENTO")
+                    print("Motor: OK" if G.DRONE.State[12] == 0 else "Motor: Problem")
+                    print("Ultrasonido: OK" if G.DRONE.State[21] == 0 else "Ultrasonido: Problem")
+                    print("Magnetometro: OK" if G.DRONE.State[18] == 0 else "Magnetometro: Problem")
+                    print("----------------------------------")
+                    print("----------------------------------")"""
 
-                if bat < 15:
+                """if bat < 15:
                     stop = True
                     print "Bateria Baja: "+str(bat)
                     print("----------------------------------")
-                    print("----------------------------------")
+                    print("----------------------------------")"""
                 # Muestra imagen
                 cv2.imshow("DRONE", frame)
                 #cv2.imshow("DRONE-tresh", tresh)
                 #cv2.imshow("DRONE-erode", erode)
                 #cv2.imshow("DRONE-dilate", dilate)
                 #cv2.imshow("DRONE-GRAY", tresh)
-                print(str(G.STEP))
             else:
                 if(waiting == 0):
                     print("Esperando...")
@@ -140,6 +160,7 @@ def run():
     # Apagando
     print "Aterrizando..."
     #out.release()
+    cv2.destroyAllWindows()
     G.DRONE.land()
     G.JOY.close()
     print "Terminado."
