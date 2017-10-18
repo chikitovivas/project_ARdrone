@@ -25,7 +25,6 @@ def run():
     once = True
     kernel = np.ones((5,5),np.uint8)
 
-    #cap = cv2.VideoCapture(0)
     cap = cv2.VideoCapture("Videos/Video6.avi")
     #Mientras no se mande a parar
     while not stop :
@@ -36,7 +35,7 @@ def run():
             frameFirst = G.DRONE.VideoImage                     #Leyendo frames del dron
             if not(frameFirst is None):
                 G.activation = True
-                _,frameFirst = cap.read()
+                #_,frameFirst = cap.read()
                 frame = cv2.resize(frameFirst, (G.W, G.H))      #Cambiar tamano al frame
                 #G.STEP = 0
                 if G.STEP == 0:
@@ -65,7 +64,7 @@ def run():
                     gray = cv2.cvtColor(dilate, cv2.COLOR_BGR2GRAY)
                     _,tresh = cv2.threshold(gray, 60, 255, cv2.THRESH_BINARY)    #Filtro de blanco y negro
 
-                    array_tresh = [tresh[(G.H/3):2*(G.H/3),0:G.W],tresh[0:(G.H/3),0:G.W]]
+                    array_tresh = [tresh[(G.H/3):2*(G.H/3),0:G.W],tresh[0:(G.H/2),0:G.W]]
 
                     frame,center_line,flag_line = F.drawLine(frame,array_tresh)         #Se manda a dibujar sobre el objeto detectado
                 elif G.STEP == 1:
@@ -81,7 +80,7 @@ def run():
                     gray = cv2.cvtColor(dilate, cv2.COLOR_BGR2GRAY)
                     _,tresh = cv2.threshold(gray, 60, 255, cv2.THRESH_BINARY)    #Filtro de blanco y negro
 
-                    array_tresh = [tresh[(G.H/3):2*(G.H/3),0:G.W],tresh[0:(G.H/3),0:G.W]]
+                    array_tresh = [tresh[(G.H/3):2*(G.H/3),0:G.W],tresh[0:(G.H/2),0:G.W]] #En vez de un tercio, la mitad de arriba para el calculo de los angulos
 
                     frame,array_center_line,flag = F.drawLine(frame,array_tresh)         #Se manda a dibujar sobre el objeto detectado
                     #flagTime = True
@@ -91,29 +90,22 @@ def run():
                         G.firstFind = True
                         automatic = True"""
 
+
                     #Funcion para movimientos del dron con respecto al objeto detectadoq
 
                     with G.XY_locking:
                         if G.STEP == 0:
                             G.XY_mark = (center[0],center[1])
-                            G.LAST_X_mark = center[0]
-                            G.LAST_Y_mark = center[1]
                             if flag_line:
                                 G.XY_line = (center_line[0],center_line[1])
-                                G.LAST_X_line = center_line[0]
-                                G.LAST_Y_line = center_line[1]
                         elif G.STEP == 1:
-                            print ("ENTRA STEP 1")
                             G.XY_line = array_center_line
-
-                        G.vision_var = True
                         G.notFound = False
+                        G.vision_var = True
                     once = False
                 else:
-                    if G.notFoundActivation:
-                        if G.STEP == 0: #prueba
-                            G.vision_var = False
-                        G.notFound = True
+                    G.vision_var = False
+                    G.notFound = True
                     if not once:
                         print("NO DETECTA OBJETO")
                         once = True

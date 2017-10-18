@@ -19,12 +19,12 @@ def controller():
     once = False
     global running
     automatic = False
-    """G.DRONE.takeoff()
+    G.DRONE.takeoff()
     time.sleep(5)
     G.DRONE.mtrim()
     while G.activation == False or G.DRONE.State[0] == 0:
-        var = 2"""
-        #print "..."
+        var = 2
+
     #Loop hasta que encuentre el objeto
     print "--------------------------"
     print "     BUSCANDO OBJETO      "
@@ -40,17 +40,16 @@ def controller():
             if(G.STEP == 0):
                 F.followBottom()
             elif(G.STEP == 1):
-                print("ENTRA F")
                 F.followLineSpin()
             once = False
-        elif G.notFound and automatic:
-            if G.STEP == 0:
-                F.stopMovementBottom()
+        elif automatic:
+        #    if G.STEP == 0:
+        #        F.stopMovementBottom()
             if G.STEP == 1:
-                G.DRONE.land() #prueba
-            G.notFound = False
-        else:
-            var = 2
+                F.stopMovementBottom()
+        #    G.notFound = False
+        #else:
+        #    var = 2
             #print("AUTOMATIC: " + str(automatic))
 
         if G.JOY.Back():   running =   False

@@ -27,7 +27,7 @@ def init():
     global SCREENMIDY, SCREENMIDX, DIFF, MX, MY                        # Punto medio en Y, Punto medio en X, Cantidad de circulos
     SCREENMIDX,SCREENMIDY, DIFF, MX, MY = W/2, H/2, H/7, (W/2 * 100) / W, (H/2 * 100) / H
     global RADIUSCENTER                                         # Radio del circulo central de la camara
-    RADIUSCENTER = 100
+    RADIUSCENTER = 250
     #
     global FLAG_LEFTX,FLAG_LEFTY,FLAG_RIGHTX,FLAG_RIGHTY        # Banderas
     FLAG_LEFTX,FLAG_LEFTY,FLAG_RIGHTX,FLAG_RIGHTY = False,False,False,False
