@@ -25,7 +25,6 @@ def run():
     once = True
     kernel = np.ones((5,5),np.uint8)
 
-    cap = cv2.VideoCapture("Videos/Video6.avi")
     #Mientras no se mande a parar
     while not stop :
         #time.sleep(0.01)
@@ -35,7 +34,7 @@ def run():
             frameFirst = G.DRONE.VideoImage                     #Leyendo frames del dron
             if not(frameFirst is None):
                 G.activation = True
-                #_,frameFirst = cap.read()
+                _,frameFirst = G.CAP.read()
                 frame = cv2.resize(frameFirst, (G.W, G.H))      #Cambiar tamano al frame
                 #G.STEP = 0
                 if G.STEP == 0:
@@ -69,6 +68,21 @@ def run():
                     frame,center_line,flag_line = F.drawLine(frame,array_tresh)         #Se manda a dibujar sobre el objeto detectado
                 elif G.STEP == 1:
                     HSV = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+                    mask = cv2.inRange(HSV, np.array([G.H_MIN_V_B,G.S_MIN_V_B,G.V_MIN_V_B]), np.array([G.H_MAX_V_B,G.S_MAX_V_B,G.V_MAX_V_B]))
+                    output = cv2.bitwise_and(frame, frame, mask = mask)
+
+                    blurred = cv2.GaussianBlur(output, (5, 5), 0)
+
+                    erode = cv2.erode(blurred, kernel, iterations=2)
+                    dilate = cv2.dilate(erode, kernel, iterations=5)
+
+                    gray = cv2.cvtColor(dilate, cv2.COLOR_BGR2GRAY)
+                    _,tresh = cv2.threshold(gray, 60, 255, cv2.THRESH_BINARY)    #Filtro de blanco y negro
+
+                    tresh_vasos = [tresh[(G.H/3):2*(G.H/3),0:G.W]]
+
+                    F.detection(frame,tresh_vasos)         #Se manda a dibujar sobre el objeto detectado
+
                     mask = cv2.inRange(HSV, np.array([G.H_MIN,G.S_MIN,G.V_MIN]), np.array([G.H_MAX,G.S_MAX,G.V_MAX]))
                     output = cv2.bitwise_and(frame, frame, mask = mask)
 
@@ -134,6 +148,7 @@ def run():
                     print("----------------------------------")"""
                 # Muestra imagen
                 cv2.imshow("DRONE", frame)
+                cv2.imshow("frame", tresh_vasos[0])
                 #cv2.imshow("DRONE-tresh", tresh)
                 #cv2.imshow("DRONE-erode", erode)
                 #cv2.imshow("DRONE-dilate", dilate)
@@ -150,6 +165,7 @@ def run():
         if G.JOY.Back():   stop =   True
 
     # Apagando
+    print("VASOS CONTADOS: " + str(G.conteo))
     print "Aterrizando..."
     #out.release()
     cv2.destroyAllWindows()

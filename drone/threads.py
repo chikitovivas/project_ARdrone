@@ -13,27 +13,24 @@ import numpy as np
 import globalVars as G
 import functions as F
 import followLine as FL
+
 running = True
 
 def controller():
     once = False
     global running
     automatic = False
-    G.DRONE.takeoff()
-    time.sleep(5)
-    G.DRONE.mtrim()
-    while G.activation == False or G.DRONE.State[0] == 0:
-        var = 2
+    #G.DRONE.takeoff()
+    #time.sleep(5)
+    #G.DRONE.mtrim()
+    #while G.activation == False or G.DRONE.State[0] == 0:
+    #    var = 2
 
     #Loop hasta que encuentre el objeto
     print "--------------------------"
     print "     BUSCANDO OBJETO      "
     print "--------------------------"
 
-    """while not G.firstFind:
-        print "Waiting first find"
-        time.sleep(3)
-"""
     while(running):
         automatic = F.controller(automatic)
         if G.vision_var and automatic:
@@ -60,6 +57,7 @@ def vision():
     FL.run()
 
     print("Terminando hilo de vision....")
+
 
 def main():
     global running

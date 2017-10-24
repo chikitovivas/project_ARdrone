@@ -2,20 +2,56 @@ import cv2
 import numpy as np
 import time
 
-"""H_MIN = 0
-H_MAX = 255
+H_MIN = 10
+H_MAX = 116
 S_MIN = 0
+S_MAX = 25
+V_MIN = 187
+V_MAX = 255
+
+#Verde Video 15
+"""H_MIN = 57
+H_MAX = 100
+S_MIN = 40
+S_MAX = 255
+V_MIN = 40
+V_MAX = 255"""
+#VERDE VIDEO 14
+"""H_MIN = 52
+H_MAX = 86
+S_MIN = 31
+S_MAX = 255
+V_MIN = 40
+V_MAX = 255"""
+#VERDE VIDEO 13
+"""H_MIN = 70
+H_MAX = 103
+S_MIN = 28
 S_MAX = 255
 V_MIN = 0
-V_MAX = 255"""
-
-
-H_MIN = 50
+V_MAX = 200"""
+#VERDE manguera anterior
+"""H_MIN = 50
 H_MAX = 90
 S_MIN = 50
 S_MAX = 180
 V_MIN = 40
-V_MAX = 220
+V_MAX = 220"""
+
+#Blanco vaso
+"""H_MIN = 10
+H_MAX = 116
+S_MIN = 0
+S_MAX = 25
+V_MIN = 187
+V_MAX = 255"""
+#Azul vaso
+"""H_MIN = 85
+H_MAX = 120
+S_MIN = 22
+S_MAX = 111
+V_MIN = 225
+V_MAX = 255"""
 
 W = 640
 H = 360
@@ -26,7 +62,7 @@ lower = np.array([10,69,139],dtype = "uint8")
 upper = np.array([100,133,205], dtype = "uint8")
 
 #cam = cv2.VideoCapture(0)
-cam = cv2.VideoCapture("/home/chikitovivas/Descargas/Python-control-dron/drone/Videos/Video14.avi")
+cam = cv2.VideoCapture("/home/chikitovivas/Descargas/Python-control-dron/drone/Videos/Video15.avi")
 
 def nothing(x):
     pass
@@ -55,7 +91,7 @@ cv2.createTrackbar('V_MAX','image',V_MAX,V_MAX,nothing)
 kernel = np.ones((5,5),np.uint8)
 while(1):
     while not cam.isOpened():
-        cam = cv2.VideoCapture("/home/chikitovivas/Descargas/Python-control-dron/drone/Videos/Video6.avi")
+        cam = cv2.VideoCapture("/home/chikitovivas/Descargas/Python-control-dron/drone/Videos/Video13.avi")
         cv2.waitKey(1000)
         print ("Wait for the header")
 
@@ -80,7 +116,7 @@ while(1):
             gray = cv2.cvtColor(dilate, cv2.COLOR_BGR2GRAY)
             _,tresh = cv2.threshold(gray, 60, 255, cv2.THRESH_BINARY)    #Filtro de blanco y negro
 
-            test = [tresh[0:HThird,0:W],tresh[HThird:2*(HThird),0:W],tresh[2*(HThird):3*(HThird),0:W]]
+            test = [tresh[0:H,0:W]]
             cont = 1
             for t in test:
                 im2, contours, hierarchy = cv2.findContours(t, cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)

@@ -52,6 +52,12 @@ def init():
     global firstFind
     firstFind = False
 
+    global CAP
+    CAP = cv2.VideoCapture("Videos/Video14.avi")
+
+    global conteo, in_use
+    conteo, in_use = 0, False
+
     global vision_var
     vision_var = False
     global XY_locking
@@ -65,8 +71,11 @@ def init():
     global notFoundActivation
     notFoundActivation = False
 
+    global H_MIN_V_B,H_MAX_V_B,S_MIN_V_B,S_MAX_V_B,V_MIN_V_B,V_MAX_V_B
+    H_MIN_V_B,H_MAX_V_B,S_MIN_V_B,S_MAX_V_B,V_MIN_V_B,V_MAX_V_B = 10, 116, 0, 25, 187, 255
+
     global H_MIN,H_MAX,S_MIN,S_MAX,V_MIN,V_MAX
-    H_MIN,H_MAX,S_MIN,S_MAX,V_MIN,V_MAX = 50, 90, 50, 180, 40, 220
+    H_MIN,H_MAX,S_MIN,S_MAX,V_MIN,V_MAX = 57, 100, 40, 255, 40, 255
 
     global H_MIN_T,H_MAX_T,S_MIN_T,S_MAX_T,V_MIN_T,V_MAX_T
     H_MIN_T,H_MAX_T,S_MIN_T,S_MAX_T,V_MIN_T,V_MAX_T = 165, 180, 144, 255, 210, 255

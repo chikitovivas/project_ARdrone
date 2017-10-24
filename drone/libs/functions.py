@@ -171,10 +171,10 @@ def drawLine(frame, array_tresh):
 
                 cv2.line(frame,(G.SCREENMIDX,0),(G.SCREENMIDX,G.H), (255,0,0),1)
                 cv2.line(frame,(0,G.SCREENMIDY),(G.W,G.SCREENMIDY), (255,0,0),1)
-                cv2.line(frame,(G.SCREENMIDX,G.SCREENMIDY),((G.W * 39) / 100,0), (0,0,255),2)
-                cv2.line(frame,(G.SCREENMIDX,G.SCREENMIDY),((G.W * 61) / 100,0), (0,0,255),2)
-                cv2.line(frame,(G.SCREENMIDX,G.SCREENMIDY),(0,(G.H * 39) / 100), (0,0,255),2)
-                cv2.line(frame,(G.SCREENMIDX,G.SCREENMIDY),(G.W ,(G.H * 39) / 100), (0,0,255),2)
+                cv2.line(frame,(G.SCREENMIDX,G.SCREENMIDY),(0,(G.H * 19) / 100), (0,0,255),2)
+                cv2.line(frame,(G.SCREENMIDX,G.SCREENMIDY),(G.W,(G.H * 19) / 100), (0,0,255),2)
+                #cv2.line(frame,(G.SCREENMIDX,G.SCREENMIDY),(0,(G.H * 39) / 100), (0,0,255),2)
+                #cv2.line(frame,(G.SCREENMIDX,G.SCREENMIDY),(G.W ,(G.H * 39) / 100), (0,0,255),2)
                 for i in range(1, 5):
                     cv2.circle(frame, (G.SCREENMIDX, G.SCREENMIDY), G.RADIUSCENTER*i,(0,255,0),2) ##(,(),G.RADIUSCENTER,(),)
 
@@ -383,13 +383,13 @@ def followLineSpin():
 
     # En el eje de las x (Horizontal) -> Note: Inverse
     elif G.XY_line[0][0] > (G.SCREENMIDX + G.RADIUSCENTER) and G.FLAG_MOVEMENT != 1:                  # Si el objeto esta a la derecha del centro
-        horizontal = 0.1
+        #horizontal = 0.1
         #G.DRONE.move(0.1,0.1,0,0)                                     #Llevar al centro de la linea al dron
         G.FLAG_MOVEMENT = 1
         print "followLineSpin: DERECHA"
 
     elif G.XY_line[0][0] < (G.SCREENMIDX - G.RADIUSCENTER) and G.FLAG_MOVEMENT != 2:                   # Si el objeto esta a la izquierda del centro
-        horizontal = -0.1
+        #horizontal = -0.1
         #G.DRONE.move(-0.1,0.1,0,0)
         G.FLAG_MOVEMENT = 2
         print "followLineSpin: IZQUIERDA"                                  #Llevar al centro de la linea al dron
@@ -409,7 +409,7 @@ def followLineSpin():
 
             if grados < 54:
                 giro  = 0
-                frente = 0.1
+                frente = 0.3
                 print "CENTRO"
                 print "followLineSpin: GRADOS: " +  str(grados)
             else:
@@ -417,23 +417,23 @@ def followLineSpin():
                 print "followLineSpin: giro DERECHA: " + str (giro)
                 print "followLineSpin: GRADOS: " +  str(grados)
                 if grados < 72:
-                    frente = 0.1
+                    frente = 0.3
         elif line_x < 50:
             grados = (math.degrees(math.atan(line_m)) - 90)
 
             if grados > -54:
                 giro  = 0
-                frente = 0.1
+                frente = 0.3
                 print "CENTRO"
                 print "followLineSpin: GRADOS: " +  str(grados)
             else:
                 giro = float ((grados * 0.3) / 90.00)
-                print "followLineSpin: giro DERECHA: " + str (giro)
+                print "followLineSpin: giro IZQUIERDA: " + str (giro)
                 print "followLineSpin: GRADOS: " +  str(grados)
                 if grados > -72:
-                    frente = 0.1
+                    frente = 0.3
 
-    if G.DRONE.NavData["demo"][3] > 250:
+    if G.DRONE.NavData["demo"][3] > 200:
         vertical = -0.1
     elif G.DRONE.NavData["demo"][3] < 150:
         vertical = 0.1
@@ -454,7 +454,7 @@ def followLineSpin():
 
     #Movimiento, hacer un flag para que no mande mismos movimientos
     G.DRONE.move(horizontal,frente,vertical,giro)
-    time.sleep(1)
+    time.sleep(3)
     G.DRONE.stop()
     time.sleep(1)
 
@@ -484,4 +484,18 @@ def findLargerContour(cnts):
     else:
         return cnts
 
-#def detection(frame):
+def detection(frame,array_tresh):
+    flag = False
+
+    for t in array_tresh:
+        #Revisar si hay algo en la region de interes
+        contours, hierarchy = cv2.findContours(t, cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+        if len(contours) == 0 and flag == False:
+            flag = True
+
+    if not flag:
+        G.in_use = False
+
+    elif not G.in_use:
+        G.conteo += 1
+        G.in_use = True
