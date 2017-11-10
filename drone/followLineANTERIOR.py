@@ -1,163 +1,251 @@
-######################################
-############# IMPORTS ################
-######################################
-import time, sys
-sys.path.append('/home/chikitovivas/Descargas/Python-control-dron')
-sys.path.append('/home/chikitovivas/Descargas/Python-control-dron/drone/libs')
-sys.path.append('/home/chikitovivas/Descargas/Python-control-dron/drone/libs/XboxController')
-import ps_drone
-import xbox
-import cv2
-import numpy as np
-import globalVars as G
-import functions as F
+def followLineSpinContinuos():
+    H_ant = G.FLAG_MOVEMENT_H
+    V_ant = G.FLAG_MOVEMENT_V
+    G_ant = G.FLAG_MOVEMENT_G
+    giro = 0.00
+    horizontal = 0.0
+    vertical = 0.0
+    frente = 0.0
+    var_giro = 0.4
 
-#Guardar Video
-#CODEC = cv2.cv.CV_FOURCC('D','I','V','3') # MPEG 4.3
-#out = cv2.VideoWriter('output.avi',CODEC, 10.0, (640,480))
-G.init()
-def main():
-    #G.DRONE.takeoff()
-    #Variables adicionales
-    waiting = 0
-    stop =   False
-    ground = False
-    automatic = True
-    flagTime = False
-    seconds = time.localtime().tm_sec
-    acum_x = 0
-    acum_y = 0
-    cantidad = 0
-    once = True
+    # G.XY_line[0] = Espacio de imagen del medio x,y
+    # G.XY_line[1] = Espacio de imagen del frente x,y
+    #print("G.XY_line[0][0]: " + str(G.XY_line[0][0]))
+    #MOVIMIENTO HORIZONTAL
+    print("               |=============================|")
+    #if (G.SCREENMIDX - G.RADIUSCENTER) < G.CENTER[0][0] < (G.SCREENMIDX + G.RADIUSCENTER) and G.FLAG_MOVEMENT_H != 0:   # Si el objeto esta en el centro
+    if (G.SCREENMIDX - G.RADIUSCENTER) < G.CENTER[0][0] < (G.SCREENMIDX + G.RADIUSCENTER) and G.FLAG_MOVEMENT_H != 0:
+        horizontal = 0.0
+        G.FLAG_MOVEMENT_H = 0
+        print "               |       SEGUIR DERECHO        |"
+        print("               |-----------------------------|")
 
-    #cap = cv2.VideoCapture(0)
-    #cap = cv2.VideoCapture("Video.avi")
-    #Mientras no se mande a parar
-    while not stop :
-        flagTime,seconds = F.timePass(flagTime,seconds)
-        automatic = F.controller(automatic)                     #Valor de automatic, cuando se da el boton START, cambia el valor
-        try:
-            # Leyendo frames del video del dron
-            frameFirst = G.DRONE.VideoImage                     #Leyendo frames del dron
-            if not(frameFirst is None):
-                #_,frameFirst = cap.read()
-                frame = cv2.resize(frameFirst, (G.W, G.H))      #Cambiar tamano al frame
+    # En el eje de las x (Horizontal) -> Note: Inverse
+    #elif G.CENTER[0][0] > (G.SCREENMIDX + G.RADIUSCENTER) and G.FLAG_MOVEMENT_H != 1:                  # Si el objeto esta a la derecha del centro
+    elif G.CENTER[0][0] > (G.SCREENMIDX + G.RADIUSCENTER) and G.FLAG_MOVEMENT_H != 1:
+        horizontal = 0.1
+        G.FLAG_MOVEMENT_H = 1
+        print "               |       IR A LA DERECHA       |"
+        print("               |-----------------------------|")
+
+    #elif G.CENTER[0][0] < (G.SCREENMIDX - G.RADIUSCENTER) and G.FLAG_MOVEMENT_H != 2:                   # Si el objeto esta a la izquierda del centro
+    elif G.CENTER[0][0] < (G.SCREENMIDX - G.RADIUSCENTER) and G.FLAG_MOVEMENT_H != 2:
+        horizontal = -0.1
+        G.FLAG_MOVEMENT_H = 2
+        print "               |       IR A LA IZQUIERDA     |"                                  #Llevar al centro de la linea al dron
+        print("               |-----------------------------|")
 
 
-                # Conversion de los frames a tono de grises
-                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  #Gris al frame
+    #MOVIMIENTO DE GIRO
+    if(G.FULL[0] != []) :
+        grados = gradosPoint(G.FULL[0])
+        if grados >= 0:
+            if grados < 36 and G.FLAG_MOVEMENT_G != 1:
+                G.FLAG_MOVEMENT_G = 1
+                giro  = 0.000
+                frente = 0.1
+                print "               |            CENTRO           |"
+                print("               |-----------------------------|")
+                print "               |       GRADOS: %.3f" % grados + "        |"
+                print("               |=============================|")
+            elif grados > 36 and G.FLAG_MOVEMENT_G != 2:
+                G.FLAG_MOVEMENT_G = 2
+                giro = float ((grados * var_giro) / 90.00)
+                print "               |   GIRAR HACIA LA DERECHA    |"
+                print("               |-----------------------------|")
+                print "               |       GRADOS: %.3f" % grados + "        |"
+                print("               |=============================|")
+                if grados < 54:
+                    frente = 0.1
+        elif grados < 0:
+            if grados > -36 and G.FLAG_MOVEMENT_G != 3: #PROBAR CON 45
+                G.FLAG_MOVEMENT_G = 3
+                giro  = 0.000
+                frente = 0.1
+                print "               |            CENTRO           |"
+                print("               |-----------------------------|")
+                print "               |       GRADOS: %.3f" % grados + "       |"
+                print("               |=============================|")
+            elif grados < -36 and G.FLAG_MOVEMENT_G != 4:
+                G.FLAG_MOVEMENT_G = 4
+                giro = float ((grados * var_giro) / 90.00)
+                print "               |   GIRAR HACIA LA IZQUIERDA  |"
+                print("               |-----------------------------|")
+                print "               |       GRADOS: %.3f" % grados + "       |"
+                print("               |=============================|")
+                if grados > -54:
+                    frente = 0.1
 
-                #test
-                #edges = cv2.Canny(frame,100,200)
-                blurred = cv2.GaussianBlur(gray, (5, 5), 0)     #Filtro
-                _,tresh = cv2.threshold(blurred, 50, 255, cv2.THRESH_BINARY)    #Filtro de blanco y negro
-                cv2.imshow("tresh", tresh)                      #Se muestra el filtro blanco y negro
+    if G.FULL[0][1] < G.SCREENMIDY and G.FULL[1][1] < G.SCREENMIDY: #SI el topmost y botmost estan en la parte de arriba del frame
+        gradosRight = gradosPoint(G.FULL[3])
+        gradosLeft = gradosPoint(G.FULL[2])
+        if gradosRight > 20 or gradosLeft < -20:
+            frente = 0.0
+            print("--------------------------------------------------")
+            print("LOS DOS EXTREMOS ESTAN ARRIBA Y NO ESTAN ALINEADOS")
+            print("--------------------------------------------------")
+    elif G.FULL[0][1] > G.SCREENMIDY:
+        frente = -0.1
+        print("--------------------------------------------------")
+        print("LOS DOS EXTREMOS ESTAN ABAJO")
+        print("--------------------------------------------------")
 
-                # Creacion de los circulos de velocidad
-                for i in range(1, 5):
-                    cv2.circle(frame, (G.SCREENMIDX, G.SCREENMIDY), G.DIFF*i,(0,0,255),2) ##(,(),G.RADIUSCENTER,(),)
+    """if G.DRONE.NavData["demo"][3] > 200 and G.FLAG_MOVEMENT_V != 1:
+        vertical = -0.1
+        G.FLAG_MOVEMENT_V = 1
+    elif G.DRONE.NavData["demo"][3] < 150 and G.FLAG_MOVEMENT_V != 2:
+        vertical = 0.1
+        G.FLAG_MOVEMENT_V = 2
+    elif G.FLAG_MOVEMENT_V != 3:
+        vertical = 0
+        G.FLAG_MOVEMENT_V = 3"""
 
-                if G.STEP == 0:
-                    frame,center,flag = F.draw(frame,tresh)         #Se manda a dibujar sobre el objeto detectado
-                elif G.STEP == 1:
-                    #frame,center,flag = F.drawLine(frame,tresh)         #Se manda a dibujar sobre el objeto detectado
 
-                #Si se detecta algo
-                if flag:
-                    # Centro del objeto
-                    x1 = center[0]
-                    y1 = center[1]
+    #Movimiento, hacer un flag para que no mande mismos movimientos
+    if not (H_ant == G.FLAG_MOVEMENT_H and V_ant == G.FLAG_MOVEMENT_V and G_ant == G.FLAG_MOVEMENT_G):
+        G.DRONE.move(horizontal,frente,vertical,giro)
+        print("CAMBIO DE MOVIMIENTO")
 
-                    acum_x += x1
-                    acum_y += y1
-                    cantidad += 1
-                    #hort_speed, vert_speed = calculationSpeed(center) # NO CREO USAR
-                    if flagTime:
-                        print("X: " + str(x1))
-                        print("Y: " + str(y1))
-                        print("---------------")
-                        once = True
+    print("               |   VARIABLES DE MOVIMIENTO   |")
+    print("               |-----------------------------|")
+    if frente >= 0:
+        print("               |     FRENTE: " + str(frente)) + "             |"
+    else:
+        print("               |     FRENTE: " + str(frente)) + "            |"
+    if horizontal >= 0:
+        print("               |     HORIZONTAL: " + str(horizontal)) + "         |"
+    else:
+        print("               |     HORIZONTAL: " + str(horizontal)) + "        |"
+    if vertical >= 0:
+        print("               |     VERTICAL: " + str(vertical)) + "           |"
+    else:
+        print("               |     VERTICAL: " + str(vertical)) + "          |"
+    if giro >= 0:
+        print("               |     GIRO: %.3f" % giro + "             |")
+    else:
+        print("               |     GIRO: %.3f" % giro + "            |")
+    print("               |=============================| \n\n\n\n")
 
-                    #Funcion para movimientos del dron con respecto al objeto detectadoq
-                    #followFront(x1,y1)
-                    if automatic and flagTime:
-                        if ((x1 > prom_x - 30) and (x1 < prom_x + 30)) and ((y1 > prom_y - 30) and (y1 < prom_y + 30)):
-                            if G.STEP == 0:
-                                F.followFront(prom_x,prom_y)
-                            elif G.STEP == 1:
-                                #Seguimiento de la linea, reconocimiento
-                                G.DRONE.stop()
-                                G.DRONE.turnAngle(-180,0.5,1)
-                                G.DRONE.land()
-                                #F.followLine(prom_x,prom_y)
-                        #else:
-                        #    F.followFront(x1,y1)
-                        #F.followFront(prom_x,prom_y)
-                        cantidad = 0
-                        acum_x = 0
-                        acum_y = 0
-                        #F.followBottom(x1,y1)
-                        #time.sleep(0.0001)
-                    elif automatic and not flagTime:
-                        prom_x,prom_y = F.promediar(acum_x,acum_y,cantidad)
-                    once = False
-                else:
-                    if not once:
-                        print("NO DETECTA OBJETO")
-                        once = True
+    #time.sleep(0.5)
 
-                    if automatic:
-                        G.DRONE.stop()
-                        #F.stopMovementFront()                      #Si se pierde el objeto detectado
-                        #F.stopMovementBottom()                    #Si se pierde el objeto detectado
+def followLineSpin():
+    giro = 0.00
+    horizontal = 0.0
+    vertical = 0.0
+    frente = 0.0
+    kp_giro = 0.3
+    kp_horizontal = 0.1
+    kp_frente = 0.2
 
-                # Estatus de la bateria
-                bat = G.DRONE.getBattery()[0]
-                if flagTime:
-                    print "Bateria: " + str(bat)
-                    if automatic:
-                        print("Modo: Automatico!")
-                    else:
-                        print("Modo: MANUAL")
-                    print("----------------------------------")
-                    print("----------------------------------")
-                #print("DRONE State:"+ str(DRONE.State))
-                #print("Angular speed control:"+ str(DRONE.State[3]))
-                #print("Altitude control active:"+ str(DRONE.State[4]))
-                #if(DRONE.State[20]):        print("MUCHO VIENTO!")
-                #print("Demo - Altitude: " +str(G.DRONE.NavData["demo"][3]))
 
-                if bat < 12:
-                    stop = True
-                    print "Bateria Baja: "+str(bat)
-                    print("----------------------------------")
-                    print("----------------------------------")
-                # Guarda imagen en video
-                #out.write(frame)
-                # Muestra imagen
-                cv2.imshow("DRONE", frame)
-            else:
-                if(waiting == 0):
-                    print("Esperando...")
-                waiting += 1
-        except Exception as e:
-            print "Error: " + str(e)
-            print "Failed"
+    #MOVIMIENTO HORIZONTAL
+    print("               |=============================|")
+    #if (G.SCREENMIDX - G.RADIUSCENTER) < G.CENTER[0][0] < (G.SCREENMIDX + G.RADIUSCENTER) and G.FLAG_MOVEMENT_H != 0:   # Si el objeto esta en el centro
+    if (G.SCREENMIDX - G.RADIUSCENTER) < G.FULL[0][0] < (G.SCREENMIDX + G.RADIUSCENTER) :
+        horizontal = kp_horizontal * 0
+        print "               |       SEGUIR DERECHO        |"
+        print("               |-----------------------------|")
 
-        if cv2.waitKey(1) & 0xFF == ord('q'):   stop =   True
-        if G.JOY.Back():   stop =   True
+    # En el eje de las x (Horizontal) -> Note: Inverse
+    #elif G.CENTER[0][0] > (G.SCREENMIDX + G.RADIUSCENTER) and G.FLAG_MOVEMENT_H != 1:                  # Si el objeto esta a la derecha del centro
+    elif G.FULL[0][0] > (G.SCREENMIDX + G.RADIUSCENTER):
+        horizontal = kp_horizontal
+        print "               |       IR A LA DERECHA       |"
+        print("               |-----------------------------|")
 
-    # Apagando
-    print "Aterrizando..."
-    #out.release()
-    G.DRONE.land()
-    G.JOY.close()
-    print "Terminado."
+    #elif G.CENTER[0][0] < (G.SCREENMIDX - G.RADIUSCENTER) and G.FLAG_MOVEMENT_H != 2:                   # Si el objeto esta a la izquierda del centro
+    elif G.FULL[0][0] < (G.SCREENMIDX - G.RADIUSCENTER):
+        horizontal = -kp_horizontal
+        print "               |       IR A LA IZQUIERDA     |"                                  #Llevar al centro de la linea al dron
+        print("               |-----------------------------|")
 
-#def searchingObject():
-#    print "DRONE turns 120 degree to the left"
-#    DRONE.turnAngle(-120,0.1,1)                                   # Turn 120 deg to the left, full speed, accuracy of 1 deg
-    #time.sleep(1)
 
-if __name__ == '__main__':
-	main()
+    #MOVIMIENTO DE GIRO
+    if(G.FULL[0] != []) :
+        grados = gradosPoint(G.FULL[0])
+        if grados >= 0:
+            if grados < 36:
+                giro  = 0.000
+                frente = kp_frente
+                print "               |            CENTRO           |"
+                print("               |-----------------------------|")
+                print "               |       GRADOS: %.3f" % grados + "        |"
+                print("               |=============================|")
+            elif grados > 36:
+                giro = float ((grados * kp_giro) / 90.00)
+                print "               |   GIRAR HACIA LA DERECHA    |"
+                print("               |-----------------------------|")
+                print "               |       GRADOS: %.3f" % grados + "        |"
+                print("               |=============================|")
+                if grados < 54:
+                    frente = kp_frente
+        elif grados < 0:
+            if grados > -36 : #PROBAR CON 45
+                giro  = 0.000
+                frente = kp_frente
+                print "               |            CENTRO           |"
+                print("               |-----------------------------|")
+                print "               |       GRADOS: %.3f" % grados + "       |"
+                print("               |=============================|")
+            elif grados < -36 :
+                giro = float ((grados * kp_giro) / 90.00)
+                print "               |   GIRAR HACIA LA IZQUIERDA  |"
+                print("               |-----------------------------|")
+                print "               |       GRADOS: %.3f" % grados + "       |"
+                print("               |=============================|")
+                if grados > -54:
+                    frente = kp_frente
+
+    if G.FULL[0][1] < G.SCREENMIDY and G.FULL[1][1] < G.SCREENMIDY: #SI el topmost y botmost estan en la parte de arriba del frame
+        gradosRight = gradosPoint(G.FULL[3])
+        gradosLeft = gradosPoint(G.FULL[2])
+        if gradosRight > 20 or gradosLeft < -20:
+            frente = kp_frente * 0
+            print("--------------------------------------------------")
+            print("LOS DOS EXTREMOS ESTAN ARRIBA Y NO ESTAN ALINEADOS")
+            print("--------------------------------------------------")
+    elif G.FULL[0][1] > G.SCREENMIDY:
+        frente = -kp_frente
+        print("--------------------------------------------------")
+        print("LOS DOS EXTREMOS ESTAN ABAJO")
+        print("--------------------------------------------------")
+
+    """if G.DRONE.NavData["demo"][3] > 200 and G.FLAG_MOVEMENT_V != 1:
+        vertical = -0.1
+        G.FLAG_MOVEMENT_V = 1
+    elif G.DRONE.NavData["demo"][3] < 150 and G.FLAG_MOVEMENT_V != 2:
+        vertical = 0.1
+        G.FLAG_MOVEMENT_V = 2
+    elif G.FLAG_MOVEMENT_V != 3:
+        vertical = 0
+        G.FLAG_MOVEMENT_V = 3"""
+
+
+    #Movimiento, hacer un flag para que no mande mismos movimientos
+
+    G.DRONE.move(horizontal,frente,vertical,giro)
+
+
+    print("               |   VARIABLES DE MOVIMIENTO   |")
+    print("               |-----------------------------|")
+    if frente >= 0:
+        print("               |     FRENTE: " + str(frente)) + "             |"
+    else:
+        print("               |     FRENTE: " + str(frente)) + "            |"
+    if horizontal >= 0:
+        print("               |     HORIZONTAL: " + str(horizontal)) + "         |"
+    else:
+        print("               |     HORIZONTAL: " + str(horizontal)) + "        |"
+    if vertical >= 0:
+        print("               |     VERTICAL: " + str(vertical)) + "           |"
+    else:
+        print("               |     VERTICAL: " + str(vertical)) + "          |"
+    if giro >= 0:
+        print("               |     GIRO: %.3f" % giro + "             |")
+    else:
+        print("               |     GIRO: %.3f" % giro + "            |")
+    print("               |=============================| \n\n\n\n")
+
+    time.sleep(1)
+    G.DRONE.stop()
+    time.sleep(1)

@@ -2,64 +2,43 @@ import cv2
 import numpy as np
 import time
 
-H_MIN = 10
-H_MAX = 116
-S_MIN = 0
-S_MAX = 25
-V_MIN = 187
-V_MAX = 255
+H_MIN = 68
+H_MAX = 79
+S_MIN = 61
+S_MAX = 255
+V_MIN = 29
+V_MAX = 111
+ # VIDEO 2: 64, 98, 24, 163, 75, 151 #MAS ERRORES
+ # VIDEO 3: 42, 104, 75, 255, 44, 148
+ # VIDEO 4: 69, 105, 65, 255, 46, 146 #QUITAR
+ # VIDEO 5: 68, 91, 61, 255, 69, 146
+ # VIDEO 6: 68, 95, 64, 255, 39, 255
+ # VIDEO 7: 65, 96, 62, 255, 53, 154
+ # VIDEO 8: 61, 125, 60, 200, 34, 151
+ # VIDEO 9: 52, 89, 48, 161, 49, 141
+ # VIDEO 10: 60, 87, 44, 169, 66, 128
+ # VIDEO 11: 66, 89, 46, 184, 24, 175
+ # VIDEO 12: 65, 102, 41, 176, 64, 146
+ # VIDEO 13: 70, 103, 28, 255, 4, 200
+ # VIDEO 14: 52, 86, 31, 255, 40, 255
+ # VIDEO 15: 57, 100, 40, 255, 40, 255
+ # VIDEO 15 MEJORADO: 68, 79, 61, 255, 29, 111
+ # AMARILLO
+ # VIDEO 16: 0, 27, 26, 200, 76, 255
+ # VIDEO 17: NO GUSTA
+ # VIDEO 18: 5, 28, 40, 192, 120, 214  #Amarillo sombra cerca EL MEJOR
+ # VIDEO 19: 10, 22, 81, 179, 119, 233  #Amarillo
+ # VIDEO 20: 13, 35, 31, 109, 111, 158  #Amarillo LEJOS
+ # BLANCO VASO: 10, 116, 0, 25, 187, 255
+ # AZUL VASO: 85, 120, 22, 111, 225, 255
 
-#Verde Video 15
-"""H_MIN = 57
-H_MAX = 100
-S_MIN = 40
-S_MAX = 255
-V_MIN = 40
-V_MAX = 255"""
-#VERDE VIDEO 14
-"""H_MIN = 52
-H_MAX = 86
-S_MIN = 31
-S_MAX = 255
-V_MIN = 40
-V_MAX = 255"""
-#VERDE VIDEO 13
-"""H_MIN = 70
-H_MAX = 103
-S_MIN = 28
-S_MAX = 255
-V_MIN = 0
-V_MAX = 200"""
-#VERDE manguera anterior
-"""H_MIN = 50
-H_MAX = 90
-S_MIN = 50
-S_MAX = 180
-V_MIN = 40
-V_MAX = 220"""
+#VERDE manguera anterior: 50, 90, 50, 180, 40, 220
 
-#Blanco vaso
-"""H_MIN = 10
-H_MAX = 116
-S_MIN = 0
-S_MAX = 25
-V_MIN = 187
-V_MAX = 255"""
-#Azul vaso
-"""H_MIN = 85
-H_MAX = 120
-S_MIN = 22
-S_MAX = 111
-V_MIN = 225
-V_MAX = 255"""
 
 W = 640
 H = 360
 ERROR = 50
 DIFF = H/7
-
-lower = np.array([10,69,139],dtype = "uint8")
-upper = np.array([100,133,205], dtype = "uint8")
 
 #cam = cv2.VideoCapture(0)
 cam = cv2.VideoCapture("/home/chikitovivas/Descargas/Python-control-dron/drone/Videos/Video15.avi")
@@ -67,15 +46,6 @@ cam = cv2.VideoCapture("/home/chikitovivas/Descargas/Python-control-dron/drone/V
 def nothing(x):
     pass
 
-def findLargerContour(cnts):
-    if cnts != []:
-        largest_contour = cnts[0]
-        for c in cnts:
-            if cv2.contourArea(c) > cv2.contourArea(largest_contour):
-                largest_contour = c
-        return largest_contour
-    else:
-        return cnts
 
 # Create a black image, a window
 img = np.zeros((300,512,3), np.uint8)
@@ -88,10 +58,10 @@ cv2.createTrackbar('S_MIN','image',S_MIN,S_MAX,nothing)
 cv2.createTrackbar('S_MAX','image',V_MAX,S_MAX,nothing)
 cv2.createTrackbar('V_MIN','image',V_MIN,V_MAX,nothing)
 cv2.createTrackbar('V_MAX','image',V_MAX,V_MAX,nothing)
-kernel = np.ones((5,5),np.uint8)
+kernel = np.ones((3,3),np.uint8)
 while(1):
     while not cam.isOpened():
-        cam = cv2.VideoCapture("/home/chikitovivas/Descargas/Python-control-dron/drone/Videos/Video13.avi")
+        cam = cv2.VideoCapture("/home/chikitovivas/Descargas/Python-control-dron/drone/Videos/Video15.avi")
         cv2.waitKey(1000)
         print ("Wait for the header")
 
@@ -105,47 +75,58 @@ while(1):
 
         if(flag):
             frame = cv2.resize(frame,(W,H))
-            HSV = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+            blurred = cv2.GaussianBlur(frame, (5, 5), 0)
+            HSV = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
+
             mask = cv2.inRange(HSV, np.array([H_MIN,S_MIN,V_MIN]), np.array([H_MAX,S_MAX,V_MAX]))
             output = cv2.bitwise_and(frame, frame, mask = mask)
-            blurred = cv2.GaussianBlur(output, (5, 5), 0)
-
-            erode = cv2.erode(blurred, kernel, iterations=2)
-            dilate = cv2.dilate(erode, kernel, iterations=5)
+            erode = cv2.erode(output, kernel, iterations=1)
+            opening = cv2.morphologyEx(erode, cv2.MORPH_OPEN, kernel)
+            closing = cv2.morphologyEx(opening, cv2.MORPH_CLOSE, kernel)
+            dilate = cv2.dilate(opening, kernel, iterations=5)
 
             gray = cv2.cvtColor(dilate, cv2.COLOR_BGR2GRAY)
-            _,tresh = cv2.threshold(gray, 60, 255, cv2.THRESH_BINARY)    #Filtro de blanco y negro
 
-            test = [tresh[0:H,0:W]]
-            cont = 1
-            for t in test:
-                im2, contours, hierarchy = cv2.findContours(t, cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
-                cnt = findLargerContour(contours)
-                #peri = cv2.arcLength(cnt, True)
-                #approx = cv2.approxPolyDP(cnt, 0.04 * peri, True)
-                #if len(approx) == 4:
-                if cnt != []:
-                    #cv2.drawContours(frame,cnt, -1, (0, 255, 0), 5)
 
-                    M = cv2.moments(cnt)
-                    if  M['m00'] != 0:
-                        cx = int(M['m10']/M['m00'])
-                        cy = int(M['m01']/M['m00']) if cont == 1 else int(M['m01']/M['m00']) + HThird if cont == 2 else int(M['m01']/M['m00']) + 2*(HThird)
+            _,tresh = cv2.threshold(gray, 30, 255, cv2.THRESH_BINARY)    #Filtro de blanco y negro
+            edges = cv2.Canny(tresh,20,100)
 
-                        for i in range(1, 5):
-                            cv2.circle(frame, (W/2, H/2), DIFF*i,(0,255,0),2) ##(,(),G.RADIUSCENTER,(),)
 
-                        cv2.line(frame, (W/2, H/2), (cx,cy), (0,255,0),2)
-                        cv2.putText(output, ".", (cx, cy), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-                        cv2.circle(output,(cx, cy),1,(0,0,255),1)
-                cont += 1
+
+            im2, contours, hierarchy = cv2.findContours(edges, cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)
+            #cnt = findLargerContour(contours)
+
+            if len(contours) != 0:
+                x,y,w,h = cv2.boundingRect(contours[0])
+                aspect_ratio = float(w)/h
+
+                #print ("ANCHO:" + str (w))
+                #print ("LARGO:" + str (h))
+                #print ("DIAMETRO: " + str(aspect_ratio))
+                cv2.drawContours(frame,contours, -1, (0, 255, 0), 5)
+
+                M = cv2.moments(contours[0])
+                if  M['m00'] != 0 and h > 50:
+                    cx = int(M['m10']/M['m00'])
+                    cy = int(M['m01']/M['m00'])
+
+                    for i in range(1, 5):
+                        cv2.circle(frame, (W/2, H/2), DIFF*i,(0,255,0),2) ##(,(),G.RADIUSCENTER,(),)
+
+                    cv2.line(frame, (W/2, H/2), (cx,cy), (0,255,0),2)
+                    cv2.putText(output, ".", (cx, cy), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
+                    cv2.circle(output,(cx, cy),1,(0,0,255),1)
+
 
             #cv2.imshow('dilate',dilate)
             #cv2.imshow('erode',erode)
-            #cv2.imshow('gray',gray)
-            #cv2.imshow('blurred',blurred)
-            #cv2.imshow('erode',erode)
+            #cv2.imshow('opening',opening)
+            #cv2.imshow('closing',closing)
+            #cv2.imshow('edges',edges)
             #cv2.imshow('tresh',tresh)
+            #cv2.imshow('gray',gray)
+            #cv2.imshow('medianBlur',medianBlur)
+            #cv2.imshow('bilateralFilter',bilateralFilter)
             cv2.imshow('image',output)
             cv2.imshow('frame',frame)
 

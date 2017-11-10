@@ -13,13 +13,15 @@ import numpy as np
 import globalVars as G
 import functions as F
 import followLine as FL
-
+#import followLineFPS as FL
+G.init()
 running = True
 
 def controller():
     once = False
     global running
     automatic = False
+    print("DESPEGANDO..")
     #G.DRONE.takeoff()
     #time.sleep(5)
     #G.DRONE.mtrim()
@@ -34,22 +36,11 @@ def controller():
     while(running):
         automatic = F.controller(automatic)
         if G.vision_var and automatic:
-            if(G.STEP == 0):
-                F.followBottom()
-            elif(G.STEP == 1):
-                F.followLineSpin()
+            #F.followLineSpin()
+            F.followLineSpinContinuos()
+            #F.followLineSpinContinuosNOSTOP()
             once = False
-        elif automatic:
-        #    if G.STEP == 0:
-        #        F.stopMovementBottom()
-            if G.STEP == 1:
-                F.stopMovementBottom()
-        #    G.notFound = False
-        #else:
-        #    var = 2
-            #print("AUTOMATIC: " + str(automatic))
-
-        if G.JOY.Back():   running =   False
+        #if G.JOY.Back():   running =   False
 
     print("Terminando hilo de control....")
 

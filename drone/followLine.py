@@ -8,6 +8,7 @@ sys.path.append('/home/chikitovivas/Descargas/Python-control-dron/drone/libs/Xbo
 import ps_drone
 import xbox
 import cv2
+import math
 import numpy as np
 import globalVars as G
 import functions as F
@@ -15,7 +16,7 @@ import functions as F
 #Guardar Video
 #CODEC = cv2.cv.CV_FOURCC('D','I','V','3') # MPEG 4.3
 #out = cv2.VideoWriter('output.avi',CODEC, 10.0, (640,480))
-G.init()
+
 def run():
     #Variables adicionales
     waiting = 0
@@ -23,7 +24,8 @@ def run():
     flagTime = False
     seconds = time.localtime().tm_sec
     once = True
-    kernel = np.ones((5,5),np.uint8)
+    kernel = np.ones((3,3   ),np.uint8)
+    cap = cv2.VideoCapture("Videos/Video18.avi")
 
     #Mientras no se mande a parar
     while not stop :
@@ -32,94 +34,85 @@ def run():
         try:
             # Leyendo frames del video del dron
             frameFirst = G.DRONE.VideoImage                     #Leyendo frames del dron
+            _,frameFirst = cap.read()
             if not(frameFirst is None):
                 G.activation = True
-                _,frameFirst = G.CAP.read()
                 frame = cv2.resize(frameFirst, (G.W, G.H))      #Cambiar tamano al frame
-                #G.STEP = 0
-                if G.STEP == 0:
-                    frame = cv2.resize(frame,(G.W,G.H))
-                    HSV = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-                    #MARCA
-                    mask = cv2.inRange(HSV, np.array([G.H_MIN_T,G.S_MIN_T,G.V_MIN_T]), np.array([G.H_MAX_T,G.S_MAX_T,G.V_MAX_T]))
+                blurred = cv2.GaussianBlur(frame, (5, 5), 0)
+                HSV = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
+
+                mask = cv2.inRange(HSV, np.array([G.H_MIN_V_B,G.S_MIN_V_B,G.V_MIN_V_B]), np.array([G.H_MAX_V_B,G.S_MAX_V_B,G.V_MAX_V_B]))
+                output = cv2.bitwise_and(frame, frame, mask = mask)
+
+                erode = cv2.erode(blurred, kernel, iterations=2)
+                dilate = cv2.dilate(erode, kernel, iterations=5)
+
+                gray = cv2.cvtColor(dilate, cv2.COLOR_BGR2GRAY)
+                _,tresh = cv2.threshold(gray, 60, 255, cv2.THRESH_BINARY)    #Filtro de blanco y negro
+
+                tresh_vasos = [tresh[(G.H/3):2*(G.H/3),0:G.W]]
+
+                frame = F.detection(frame,tresh_vasos)         #Vasos a detectar
+                """mask = cv2.inRange(HSV, np.array([G.H_MIN_1,G.S_MIN_1,G.V_MIN_1]), np.array([G.H_MAX_1,G.S_MAX_1,G.V_MAX_1])) +
+                        cv2.inRange(HSV, np.array([G.H_MIN_2,G.S_MIN_2,G.V_MIN_2]), np.array([G.H_MAX_2,G.S_MAX_2,G.V_MAX_2])) +
+                        cv2.inRange(HSV, np.array([G.H_MIN_3,G.S_MIN_3,G.V_MIN_3]), np.array([G.H_MAX_3,G.S_MAX_3,G.V_MAX_3])) +
+                        cv2.inRange(HSV, np.array([G.H_MIN_4,G.S_MIN_4,G.V_MIN_4]), np.array([G.H_MAX_4,G.S_MAX_4,G.V_MAX_4])) +
+                        cv2.inRange(HSV, np.array([G.H_MIN_5,G.S_MIN_5,G.V_MIN_5]), np.array([G.H_MAX_5,G.S_MAX_5,G.V_MAX_5])) +
+                        cv2.inRange(HSV, np.array([G.H_MIN_6,G.S_MIN_6,G.V_MIN_6]), np.array([G.H_MAX_6,G.S_MAX_6,G.V_MAX_6])) +
+                        cv2.inRange(HSV, np.array([G.H_MIN_7,G.S_MIN_7,G.V_MIN_7]), np.array([G.H_MAX_7,G.S_MAX_7,G.V_MAX_7])) +
+                        cv2.inRange(HSV, np.array([G.H_MIN_8,G.S_MIN_8,G.V_MIN_8]), np.array([G.H_MAX_8,G.S_MAX_8,G.V_MAX_8])) +
+                        cv2.inRange(HSV, np.array([G.H_MIN_9,G.S_MIN_9,G.V_MIN_9]), np.array([G.H_MAX_9,G.S_MAX_9,G.V_MAX_9])) +
+                        cv2.inRange(HSV, np.array([G.H_MIN_10,G.S_MIN_10,G.V_MIN_10]), np.array([G.H_MAX_10,G.S_MAX_10,G.V_MAX_10])) +
+                        cv2.inRange(HSV, np.array([G.H_MIN_11,G.S_MIN_11,G.V_MIN_11]), np.array([G.H_MAX_11,G.S_MAX_11,G.V_MAX_11])) +
+                        cv2.inRange(HSV, np.array([G.H_MIN_12,G.S_MIN_12,G.V_MIN_12]), np.array([G.H_MAX_12,G.S_MAX_12,G.V_MAX_12]))"""
+                if len(sys.argv) == 1 or sys.argv[len(sys.argv) - 1].lower() == 'verde':
+                    mask = cv2.inRange(HSV, np.array([G.H_MIN_13,G.S_MIN_13,G.V_MIN_13]), np.array([G.H_MAX_13,G.S_MAX_13,G.V_MAX_13]))
                     output = cv2.bitwise_and(frame, frame, mask = mask)
 
-                    gray = cv2.cvtColor(output, cv2.COLOR_BGR2GRAY)
-                    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
-                    _,tresh = cv2.threshold(blurred, 30, 255, cv2.THRESH_BINARY)    #Filtro de blanco y negro
-                    #erode = cv2.erode(tresh, kernel, iterations=2)
-                    dilate = cv2.dilate(tresh, kernel, iterations=8)
-                    frame,center,flag = F.draw(frame,dilate)         #Se manda a dibujar sobre el objeto detectado
+                    erode = cv2.erode(output, kernel, iterations=1)
+                    opening = cv2.morphologyEx(erode, cv2.MORPH_OPEN, kernel)
 
-                    #LINEA
-                    mask = cv2.inRange(HSV, np.array([G.H_MIN,G.S_MIN,G.V_MIN]), np.array([G.H_MAX,G.S_MAX,G.V_MAX]))
-                    output = cv2.bitwise_and(frame, frame, mask = mask)
-
-                    blurred = cv2.GaussianBlur(output, (5, 5), 0)
-
-                    erode = cv2.erode(blurred, kernel, iterations=2)
-                    dilate = cv2.dilate(erode, kernel, iterations=5)
+                    closing = cv2.morphologyEx(opening, cv2.MORPH_CLOSE, kernel)
+                    dilate = cv2.dilate(opening, kernel, iterations=5)
 
                     gray = cv2.cvtColor(dilate, cv2.COLOR_BGR2GRAY)
-                    _,tresh = cv2.threshold(gray, 60, 255, cv2.THRESH_BINARY)    #Filtro de blanco y negro
+                    _,tresh = cv2.threshold(gray, 30, 255, cv2.THRESH_BINARY)    #Filtro de blanco y negro
+                    edges = cv2.Canny(tresh,20,100)
 
-                    array_tresh = [tresh[(G.H/3):2*(G.H/3),0:G.W],tresh[0:(G.H/2),0:G.W]]
-
-                    frame,center_line,flag_line = F.drawLine(frame,array_tresh)         #Se manda a dibujar sobre el objeto detectado
-                elif G.STEP == 1:
-                    HSV = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-                    mask = cv2.inRange(HSV, np.array([G.H_MIN_V_B,G.S_MIN_V_B,G.V_MIN_V_B]), np.array([G.H_MAX_V_B,G.S_MAX_V_B,G.V_MAX_V_B]))
+                elif sys.argv[len(sys.argv) - 1].lower() == 'amarillo':
+                    mask = cv2.inRange(HSV, np.array([G.H_MIN_A,G.S_MIN_A,G.V_MIN_A]), np.array([G.H_MAX_A,G.S_MAX_A,G.V_MAX_A]))
                     output = cv2.bitwise_and(frame, frame, mask = mask)
 
-                    blurred = cv2.GaussianBlur(output, (5, 5), 0)
+                    erode = cv2.erode(output, kernel, iterations=1)
+                    opening = cv2.morphologyEx(erode, cv2.MORPH_OPEN, kernel)
 
-                    erode = cv2.erode(blurred, kernel, iterations=2)
-                    dilate = cv2.dilate(erode, kernel, iterations=5)
-
-                    gray = cv2.cvtColor(dilate, cv2.COLOR_BGR2GRAY)
-                    _,tresh = cv2.threshold(gray, 60, 255, cv2.THRESH_BINARY)    #Filtro de blanco y negro
-
-                    tresh_vasos = [tresh[(G.H/3):2*(G.H/3),0:G.W]]
-
-                    F.detection(frame,tresh_vasos)         #Se manda a dibujar sobre el objeto detectado
-
-                    mask = cv2.inRange(HSV, np.array([G.H_MIN,G.S_MIN,G.V_MIN]), np.array([G.H_MAX,G.S_MAX,G.V_MAX]))
-                    output = cv2.bitwise_and(frame, frame, mask = mask)
-
-                    blurred = cv2.GaussianBlur(output, (5, 5), 0)
-
-                    erode = cv2.erode(blurred, kernel, iterations=2)
-                    dilate = cv2.dilate(erode, kernel, iterations=5)
+                    closing = cv2.morphologyEx(opening, cv2.MORPH_CLOSE, kernel)
+                    dilate = cv2.dilate(opening, kernel, iterations=5)
 
                     gray = cv2.cvtColor(dilate, cv2.COLOR_BGR2GRAY)
-                    _,tresh = cv2.threshold(gray, 60, 255, cv2.THRESH_BINARY)    #Filtro de blanco y negro
+                    _,tresh = cv2.threshold(gray, 30, 255, cv2.THRESH_BINARY)    #Filtro de blanco y negro
+                    edges = cv2.Canny(tresh,20,100)
 
-                    array_tresh = [tresh[(G.H/3):2*(G.H/3),0:G.W],tresh[0:(G.H/2),0:G.W]] #En vez de un tercio, la mitad de arriba para el calculo de los angulos
+                elif sys.argv[len(sys.argv) - 1].lower() == 'rojo':
+                    print 'red'
+                else:
+                    print 'Introduce valores de parametros (1), Verde, Amarillo o Rojo'
+                    stop = True
 
-                    frame,array_center_line,flag = F.drawLine(frame,array_tresh)         #Se manda a dibujar sobre el objeto detectado
-                    #flagTime = True
+                frame, full, flag = F.drawLineCHANGE(frame,edges)
+
                 #Si se detecta algo
                 if flag:
-                    """if(G.firstFind == False):
-                        G.firstFind = True
-                        automatic = True"""
-
-
                     #Funcion para movimientos del dron con respecto al objeto detectadoq
-
                     with G.XY_locking:
-                        if G.STEP == 0:
-                            G.XY_mark = (center[0],center[1])
-                            if flag_line:
-                                G.XY_line = (center_line[0],center_line[1])
-                        elif G.STEP == 1:
-                            G.XY_line = array_center_line
-                        G.notFound = False
+
+                        G.FULL = full
+
                         G.vision_var = True
+
                     once = False
                 else:
-                    G.vision_var = False
-                    G.notFound = True
+
                     if not once:
                         print("NO DETECTA OBJETO")
                         once = True
@@ -148,8 +141,9 @@ def run():
                     print("----------------------------------")"""
                 # Muestra imagen
                 cv2.imshow("DRONE", frame)
-                cv2.imshow("frame", tresh_vasos[0])
-                #cv2.imshow("DRONE-tresh", tresh)
+                #cv2.imshow("frame", edges)
+                #cv2.imshow("blurred", blurred)
+                #cv2.imshow("DRONE-tresh", gray)
                 #cv2.imshow("DRONE-erode", erode)
                 #cv2.imshow("DRONE-dilate", dilate)
                 #cv2.imshow("DRONE-GRAY", tresh)
