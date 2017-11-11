@@ -22,11 +22,12 @@ def controller():
     global running
     automatic = False
     print("DESPEGANDO..")
-    #G.DRONE.takeoff()
-    #time.sleep(5)
-    #G.DRONE.mtrim()
-    #while G.activation == False or G.DRONE.State[0] == 0:
-    #    var = 2
+    if sys.argv[1].lower() == '-real':
+        G.DRONE.takeoff()
+        time.sleep(5)
+        G.DRONE.mtrim()
+        while G.activation == False or G.DRONE.State[0] == 0:
+            var = 2
 
     #Loop hasta que encuentre el objeto
     print "--------------------------"

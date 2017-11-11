@@ -354,8 +354,8 @@ def followLineSpinContinuos():
     horizontal = 0.0
     vertical = 0.0
     frente = 0.0
-    var_giro = 0.3
-    Kp = 0.2
+    var_giro = 0.2
+    Kp = 0.1
     Kp_frente = 0.05
     Ki = 0
     Kd = 0
@@ -363,8 +363,9 @@ def followLineSpinContinuos():
     #MOVIMIENTO HORIZONTAL
     #if (G.SCREENMIDX - G.RADIUSCENTER) < G.CENTER[0][0] < (G.SCREENMIDX + G.RADIUSCENTER) and G.FLAG_MOVEMENT_H != 0:   # Si el objeto esta en el centro
     if (G.SCREENMIDX - G.RADIUSCENTER) < G.FULL[0][0] < (G.SCREENMIDX + G.RADIUSCENTER) and G.FLAG_MOVEMENT_H != 0:
-        horizontal = (Kp + Ki + Kd) * 0 / G.SCREENMIDX
+        horizontal = ((Kp + Ki + Kd) * 0) / G.SCREENMIDX
         G.FLAG_MOVEMENT_H = 0
+        frente = Kp_frente
         print("               |=============================|")
         print "               |       SEGUIR DERECHO        |"
         print("               |-----------------------------|")
@@ -372,18 +373,20 @@ def followLineSpinContinuos():
     # En el eje de las x (Horizontal) -> Note: Inverse
     #elif G.CENTER[0][0] > (G.SCREENMIDX + G.RADIUSCENTER) and G.FLAG_MOVEMENT_H != 1:                  # Si el objeto esta a la derecha del centro
     elif G.FULL[0][0] > (G.SCREENMIDX + G.RADIUSCENTER) and G.FLAG_MOVEMENT_H != 1:
-        error = ((G.SCREENMIDX + G.RADIUSCENTER) - G.FULL[0][0])
-        horizontal = (Kp + Ki + Kd) * error / G.W - (G.SCREENMIDX + G.RADIUSCENTER)
+        error = (G.FULL[0][0] - (G.SCREENMIDX + G.RADIUSCENTER))
+        horizontal = ((Kp + Ki + Kd) * error) / (G.W - (G.SCREENMIDX + G.RADIUSCENTER))
         G.FLAG_MOVEMENT_H = 1
+        frente = Kp_frente
         print("               |=============================|")
         print "               |       IR A LA DERECHA       |"
         print("               |-----------------------------|")
 
     #elif G.CENTER[0][0] < (G.SCREENMIDX - G.RADIUSCENTER) and G.FLAG_MOVEMENT_H != 2:                   # Si el objeto esta a la izquierda del centro
     elif G.FULL[0][0] < (G.SCREENMIDX - G.RADIUSCENTER) and G.FLAG_MOVEMENT_H != 2:
-        error = ((G.SCREENMIDX - G.RADIUSCENTER) + G.FULL[0][0])
-        horizontal = (Kp + Ki + Kd) * error / (G.SCREENMIDX - G.RADIUSCENTER)
+        error = ((G.RADIUSCENTER - G.SCREENMIDX) + G.FULL[0][0])
+        horizontal = ((Kp + Ki + Kd) * error) / (G.SCREENMIDX - G.RADIUSCENTER)
         G.FLAG_MOVEMENT_H = 2
+        frente = Kp_frente
         print("               |=============================|")
         print "               |       IR A LA IZQUIERDA     |"                                  #Llevar al centro de la linea al dron
         print("               |-----------------------------|")
@@ -393,7 +396,7 @@ def followLineSpinContinuos():
     if(G.FULL[0] != []) :
         grados_error = gradosPoint(G.FULL[0])
         if grados_error >= 0 and G.FLAG_MOVEMENT_G != 1:
-            giro = float ((grados_error * (Kp + Ki + Kd)) / 60.00)
+            giro = float ((grados_error * (Kp + Ki + Kd)) / (60.00))
             frente = Kp_frente
             G.FLAG_MOVEMENT_G = 1
             print "               |       GIRO DE DERECHA       |"
@@ -437,23 +440,19 @@ def followLineSpinContinuos():
     #time.sleep(0.5)
 
 def followLineSpinContinuosNOSTOP():
-    H_ant = G.FLAG_MOVEMENT_H
-    V_ant = G.FLAG_MOVEMENT_V
-    G_ant = G.FLAG_MOVEMENT_G
     giro = 0.00
     horizontal = 0.0
     vertical = 0.0
     frente = 0.0
-    var_giro = 0.3
-    Kp = 0.2
-    Kp_frente = 0.05
+    Kp = 0.1
+    Kp_frente = 0.1
     Ki = 0
     Kd = 0
 
     #MOVIMIENTO HORIZONTAL
     #if (G.SCREENMIDX - G.RADIUSCENTER) < G.CENTER[0][0] < (G.SCREENMIDX + G.RADIUSCENTER) and G.FLAG_MOVEMENT_H != 0:   # Si el objeto esta en el centro
     if (G.SCREENMIDX - G.RADIUSCENTER) < G.FULL[0][0] < (G.SCREENMIDX + G.RADIUSCENTER):
-        horizontal = (Kp + Ki + Kd) * 0 / G.SCREENMIDX
+        horizontal = ((Kp + Ki + Kd) * 0) / G.SCREENMIDX
         print("               |=============================|")
         print "               |       SEGUIR DERECHO        |"
         print("               |-----------------------------|")
@@ -461,16 +460,16 @@ def followLineSpinContinuosNOSTOP():
     # En el eje de las x (Horizontal) -> Note: Inverse
     #elif G.CENTER[0][0] > (G.SCREENMIDX + G.RADIUSCENTER) and G.FLAG_MOVEMENT_H != 1:                  # Si el objeto esta a la derecha del centro
     elif G.FULL[0][0] > (G.SCREENMIDX + G.RADIUSCENTER):
-        error = ((G.SCREENMIDX + G.RADIUSCENTER) - G.FULL[0][0])
-        horizontal = (Kp + Ki + Kd) * error / G.W - (G.SCREENMIDX + G.RADIUSCENTER)
+        error = (G.FULL[0][0] - (G.SCREENMIDX + G.RADIUSCENTER))
+        horizontal = ((Kp + Ki + Kd) * error) / (G.W - (G.SCREENMIDX + G.RADIUSCENTER))
         print("               |=============================|")
         print "               |       IR A LA DERECHA       |"
         print("               |-----------------------------|")
 
     #elif G.CENTER[0][0] < (G.SCREENMIDX - G.RADIUSCENTER) and G.FLAG_MOVEMENT_H != 2:                   # Si el objeto esta a la izquierda del centro
     elif G.FULL[0][0] < (G.SCREENMIDX - G.RADIUSCENTER):
-        error = ((G.SCREENMIDX - G.RADIUSCENTER) + G.FULL[0][0])
-        horizontal = (Kp + Ki + Kd) * error / (G.SCREENMIDX - G.RADIUSCENTER)
+        error = ((G.RADIUSCENTER - G.SCREENMIDX) + G.FULL[0][0])
+        horizontal = ((Kp + Ki + Kd) * error) / (G.SCREENMIDX - G.RADIUSCENTER)
         print("               |=============================|")
         print "               |       IR A LA IZQUIERDA     |"                                  #Llevar al centro de la linea al dron
         print("               |-----------------------------|")
@@ -517,7 +516,7 @@ def followLineSpinContinuosNOSTOP():
         print("               |     GIRO: %.3f" % giro + "            |")
     print("               |=============================| \n\n\n\n")
 
-    time.sleep(1)
+    time.sleep(0.5)
 
 def timePass(flagTime,seconds):
     secondsWait = 5

@@ -2,12 +2,12 @@ import cv2
 import numpy as np
 import time
 
-H_MIN = 68
-H_MAX = 79
-S_MIN = 61
-S_MAX = 255
-V_MIN = 29
-V_MAX = 111
+H_MIN = 16
+H_MAX = 32
+S_MIN = 66
+S_MAX = 228
+V_MIN = 110
+V_MAX = 255
  # VIDEO 2: 64, 98, 24, 163, 75, 151 #MAS ERRORES
  # VIDEO 3: 42, 104, 75, 255, 44, 148
  # VIDEO 4: 69, 105, 65, 255, 46, 146 #QUITAR
@@ -23,12 +23,19 @@ V_MAX = 111
  # VIDEO 14: 52, 86, 31, 255, 40, 255
  # VIDEO 15: 57, 100, 40, 255, 40, 255
  # VIDEO 15 MEJORADO: 68, 79, 61, 255, 29, 111
+ # VIDEO 21: 61, 89, 42, 158, 10, 125
+ # VIDEO 22: 67, 90, 85, 195, 36, 110
+ # VIDEO 23: 63, 87, 71, 185, 41, 120
+ # VIDEO 24: 65, 83, 40, 121, 37, 108
  # AMARILLO
  # VIDEO 16: 0, 27, 26, 200, 76, 255
  # VIDEO 17: NO GUSTA
  # VIDEO 18: 5, 28, 40, 192, 120, 214  #Amarillo sombra cerca EL MEJOR
  # VIDEO 19: 10, 22, 81, 179, 119, 233  #Amarillo
  # VIDEO 20: 13, 35, 31, 109, 111, 158  #Amarillo LEJOS
+ # VIDEO 30: 16, 32, 66, 228, 110, 255  #Amarillo volando
+
+
  # BLANCO VASO: 10, 116, 0, 25, 187, 255
  # AZUL VASO: 85, 120, 22, 111, 225, 255
 
@@ -41,7 +48,7 @@ ERROR = 50
 DIFF = H/7
 
 #cam = cv2.VideoCapture(0)
-cam = cv2.VideoCapture("/home/chikitovivas/Descargas/Python-control-dron/drone/Videos/Video15.avi")
+cam = cv2.VideoCapture("/home/chikitovivas/Descargas/Python-control-dron/drone/Videos/Video30.avi")
 
 def nothing(x):
     pass
@@ -53,9 +60,9 @@ cv2.namedWindow('image')
 
 # create trackbars for color change
 cv2.createTrackbar('H_MIN','image',H_MIN,H_MAX,nothing)
-cv2.createTrackbar('H_MAX','image',V_MAX,H_MAX,nothing)
+cv2.createTrackbar('H_MAX','image',H_MAX,H_MAX,nothing)
 cv2.createTrackbar('S_MIN','image',S_MIN,S_MAX,nothing)
-cv2.createTrackbar('S_MAX','image',V_MAX,S_MAX,nothing)
+cv2.createTrackbar('S_MAX','image',S_MAX,S_MAX,nothing)
 cv2.createTrackbar('V_MIN','image',V_MIN,V_MAX,nothing)
 cv2.createTrackbar('V_MAX','image',V_MAX,V_MAX,nothing)
 kernel = np.ones((3,3),np.uint8)
@@ -68,22 +75,23 @@ while(1):
     while(1):
         time.sleep(0.1)
         flag,frame = cam.read()
-        #frame = cv2.imread("img_start.jpg")
-        #flag = True
-        img = frame
-        HThird = H/3
 
         if(flag):
+
             frame = cv2.resize(frame,(W,H))
             blurred = cv2.GaussianBlur(frame, (5, 5), 0)
+
             HSV = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
 
             mask = cv2.inRange(HSV, np.array([H_MIN,S_MIN,V_MIN]), np.array([H_MAX,S_MAX,V_MAX]))
             output = cv2.bitwise_and(frame, frame, mask = mask)
+
+
             erode = cv2.erode(output, kernel, iterations=1)
             opening = cv2.morphologyEx(erode, cv2.MORPH_OPEN, kernel)
             closing = cv2.morphologyEx(opening, cv2.MORPH_CLOSE, kernel)
-            dilate = cv2.dilate(opening, kernel, iterations=5)
+
+            dilate = cv2.dilate(closing, kernel, iterations=5)
 
             gray = cv2.cvtColor(dilate, cv2.COLOR_BGR2GRAY)
 
@@ -129,7 +137,10 @@ while(1):
             #cv2.imshow('bilateralFilter',bilateralFilter)
             cv2.imshow('image',output)
             cv2.imshow('frame',frame)
-
+            #cv2.imshow('Histogram equalization',equ)
+            #cv2.imshow('Histogram equalization-1',cl1)
+            #cv2.imshow('Histogram equalization-2',cl2)
+            #cv2.imshow('Histogram equalization-original',cl)
 
 
             k = cv2.waitKey(1) & 0xFF

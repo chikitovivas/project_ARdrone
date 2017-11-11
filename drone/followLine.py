@@ -25,7 +25,7 @@ def run():
     seconds = time.localtime().tm_sec
     once = True
     kernel = np.ones((3,3   ),np.uint8)
-    cap = cv2.VideoCapture("Videos/Video18.avi")
+    cap = cv2.VideoCapture("Videos/Video21.avi")
 
     #Mientras no se mande a parar
     while not stop :
@@ -34,7 +34,8 @@ def run():
         try:
             # Leyendo frames del video del dron
             frameFirst = G.DRONE.VideoImage                     #Leyendo frames del dron
-            _,frameFirst = cap.read()
+            if len(sys.argv) < 3 or sys.argv[1].lower() != '-real':
+                _,frameFirst = cap.read()
             if not(frameFirst is None):
                 G.activation = True
                 frame = cv2.resize(frameFirst, (G.W, G.H))      #Cambiar tamano al frame
@@ -51,7 +52,8 @@ def run():
                 _,tresh = cv2.threshold(gray, 60, 255, cv2.THRESH_BINARY)    #Filtro de blanco y negro
 
                 tresh_vasos = [tresh[(G.H/3):2*(G.H/3),0:G.W]]
-
+                error_min = 0
+                error_max = 0
                 frame = F.detection(frame,tresh_vasos)         #Vasos a detectar
                 """mask = cv2.inRange(HSV, np.array([G.H_MIN_1,G.S_MIN_1,G.V_MIN_1]), np.array([G.H_MAX_1,G.S_MAX_1,G.V_MAX_1])) +
                         cv2.inRange(HSV, np.array([G.H_MIN_2,G.S_MIN_2,G.V_MIN_2]), np.array([G.H_MAX_2,G.S_MAX_2,G.V_MAX_2])) +
@@ -65,8 +67,8 @@ def run():
                         cv2.inRange(HSV, np.array([G.H_MIN_10,G.S_MIN_10,G.V_MIN_10]), np.array([G.H_MAX_10,G.S_MAX_10,G.V_MAX_10])) +
                         cv2.inRange(HSV, np.array([G.H_MIN_11,G.S_MIN_11,G.V_MIN_11]), np.array([G.H_MAX_11,G.S_MAX_11,G.V_MAX_11])) +
                         cv2.inRange(HSV, np.array([G.H_MIN_12,G.S_MIN_12,G.V_MIN_12]), np.array([G.H_MAX_12,G.S_MAX_12,G.V_MAX_12]))"""
-                if len(sys.argv) == 1 or sys.argv[len(sys.argv) - 1].lower() == 'verde':
-                    mask = cv2.inRange(HSV, np.array([G.H_MIN_13,G.S_MIN_13,G.V_MIN_13]), np.array([G.H_MAX_13,G.S_MAX_13,G.V_MAX_13]))
+                if len(sys.argv) < 3 or sys.argv[len(sys.argv) - 1].lower() == 'verde':
+                    mask = cv2.inRange(HSV, np.array([G.H_MIN_2 - error_min,G.S_MIN_2 - error_min,G.V_MIN_2 - error_min]), np.array([G.H_MAX_2 + error_max,G.S_MAX_2 + error_max,G.V_MAX_2 + error_max]))
                     output = cv2.bitwise_and(frame, frame, mask = mask)
 
                     erode = cv2.erode(output, kernel, iterations=1)

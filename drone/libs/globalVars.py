@@ -86,32 +86,33 @@ def init():
 # VIDEO 13: 70,         103,            28, 255,            4, 200
 # VIDEO 14: 52,         86,             31, 255,           40, 255
 # VIDEO 15: 57,      100,            40, 255,            40, 255
-    global H_MIN_1, H_MIN_2, H_MIN_3, H_MIN_4, H_MIN_5, H_MIN_6, H_MIN_7, H_MIN_8, H_MIN_9, H_MIN_10, H_MIN_11, H_MIN_12
-    H_MIN_1, H_MIN_2, H_MIN_3, H_MIN_4, H_MIN_5, H_MIN_6, H_MIN_7, H_MIN_8, H_MIN_9, H_MIN_10, H_MIN_11, H_MIN_12, H_MIN_13 = 42, 68, 68, 65, 61, 52, 60, 66, 65, 70, 52, 57, 68
+    global H_MIN_1, H_MIN_2, H_MIN_3, H_MIN_4, H_MIN_13
+    H_MIN_1, H_MIN_2, H_MIN_3, H_MIN_4, H_MIN_13 =  61, 67, 63, 65, 68
 
-    global H_MAX_1, H_MAX_2, H_MAX_3, H_MAX_4, H_MAX_5, H_MAX_6, H_MAX_7, H_MAX_8, H_MAX_9, H_MAX_10, H_MAX_11, H_MAX_12
-    H_MAX_1, H_MAX_2, H_MAX_3, H_MAX_4, H_MAX_5, H_MAX_6, H_MAX_7, H_MAX_8, H_MAX_9, H_MAX_10, H_MAX_11, H_MAX_12, H_MAX_13 = 104, 91, 95, 96, 125, 89, 87, 89, 102, 103, 86, 100, 79
+    global H_MAX_1, H_MAX_2, H_MAX_3, H_MAX_4, H_MAX_13
+    H_MAX_1, H_MAX_2, H_MAX_3, H_MAX_4, H_MAX_13 = 89, 90, 87, 83, 79
 
-    global S_MIN_1, S_MIN_2, S_MIN_3, S_MIN_4, S_MIN_5, S_MIN_6, S_MIN_7, S_MIN_8, S_MIN_9, S_MIN_10, S_MIN_11, S_MIN_12
-    S_MIN_1, S_MIN_2, S_MIN_3, S_MIN_4, S_MIN_5, S_MIN_6, S_MIN_7, S_MIN_8, S_MIN_9, S_MIN_10, S_MIN_11, S_MIN_12, S_MIN_13 = 75, 61, 64, 62, 60, 48, 44, 46, 41, 28, 31, 40, 61,
+    global S_MIN_1, S_MIN_2, S_MIN_3, S_MIN_4, S_MIN_13
+    S_MIN_1, S_MIN_2, S_MIN_3, S_MIN_4, S_MIN_13 = 42, 85, 71, 40, 61
 
-    global S_MAX_1, S_MAX_2, S_MAX_3, S_MAX_4, S_MAX_5, S_MAX_6, S_MAX_7, S_MAX_8, S_MAX_9, S_MAX_10, S_MAX_11, S_MAX_12
-    S_MAX_1, S_MAX_2, S_MAX_3, S_MAX_4, S_MAX_5, S_MAX_6, S_MAX_7, S_MAX_8, S_MAX_9, S_MAX_10, S_MAX_11, S_MAX_12, S_MAX_13 = 255, 255, 255, 255, 200, 161, 169, 184, 176, 255, 255, 255, 255
+    global S_MAX_1, S_MAX_2, S_MAX_3, S_MAX_4, S_MAX_13
+    S_MAX_1, S_MAX_2, S_MAX_3, S_MAX_4, S_MAX_13 = 158, 195, 185, 121, 255
 
-    global V_MIN_1, V_MIN_2, V_MIN_3, V_MIN_4, V_MIN_5, V_MIN_6, V_MIN_7, V_MIN_8, V_MIN_9, V_MIN_10, V_MIN_11, V_MIN_12
-    V_MIN_1, V_MIN_2, V_MIN_3, V_MIN_4, V_MIN_5, V_MIN_6, V_MIN_7, V_MIN_8, V_MIN_9, V_MIN_10, V_MIN_11, V_MIN_12, V_MIN_13 = 44, 69, 39, 53, 34, 49, 66, 24, 64, 4, 40, 40, 29
+    global V_MIN_1, V_MIN_2, V_MIN_3, V_MIN_4, V_MIN_13
+    V_MIN_1, V_MIN_2, V_MIN_3, V_MIN_4, V_MIN_13 = 10, 36, 41, 37, 29
 
-    global V_MAX_1, V_MAX_2, V_MAX_3, V_MAX_4, V_MAX_5, V_MAX_6, V_MAX_7, V_MAX_8, V_MAX_9, V_MAX_10, V_MAX_11, V_MAX_12
-    V_MAX_1, V_MAX_2, V_MAX_3, V_MAX_4, V_MAX_5, V_MAX_6, V_MAX_7, V_MAX_8, V_MAX_9, V_MAX_10, V_MAX_11, V_MAX_12, V_MAX_13 = 148, 146, 255, 154, 151, 141, 128, 175, 146, 200, 255, 255, 111
+    global V_MAX_1, V_MAX_2, V_MAX_3, V_MAX_4, V_MAX_13
+    V_MAX_1, V_MAX_2, V_MAX_3, V_MAX_4, V_MAX_13 = 125, 110, 120, 108, 111
 
     global H_MIN_A, H_MAX_A, S_MIN_A, S_MAX_A, V_MIN_A, V_MAX_A
-    H_MIN_A, H_MAX_A, S_MIN_A, S_MAX_A, V_MIN_A, V_MAX_A = 5, 28, 40, 192, 120, 214
-
-    #TARGET
-    global H_MIN_T,H_MAX_T,S_MIN_T,S_MAX_T,V_MIN_T,V_MAX_T
-    H_MIN_T,H_MAX_T,S_MIN_T,S_MAX_T,V_MIN_T,V_MAX_T = 165, 180, 144, 255, 210, 255
+    H_MIN_A, H_MAX_A, S_MIN_A, S_MAX_A, V_MIN_A, V_MAX_A = 16, 32, 66, 228, 110, 255
 
 
+ # VIDEO 15 MEJORADO: 68, 79, 61, 255, 29, 111
+ # VIDEO 21: 61, 89, 42, 158, 10, 125
+ # VIDEO 22: 67, 90, 85, 195, 36, 110
+ # VIDEO 23: 63, 87, 71, 185, 41, 120
+ # VIDEO 24: 65, 83, 40, 121, 37, 108
 def init_drone():
     global DRONE
                         ##############################################################
