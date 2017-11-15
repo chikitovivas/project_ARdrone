@@ -2,31 +2,18 @@ import cv2
 import numpy as np
 import time
 
-H_MIN = 16
-H_MAX = 32
-S_MIN = 66
-S_MAX = 228
-V_MIN = 110
-V_MAX = 255
- # VIDEO 2: 64, 98, 24, 163, 75, 151 #MAS ERRORES
- # VIDEO 3: 42, 104, 75, 255, 44, 148
- # VIDEO 4: 69, 105, 65, 255, 46, 146 #QUITAR
+H_MIN = 10
+H_MAX = 40
+S_MIN = 55
+S_MAX = 175
+V_MIN = 23
+V_MAX = 92
+
  # VIDEO 5: 68, 91, 61, 255, 69, 146
  # VIDEO 6: 68, 95, 64, 255, 39, 255
  # VIDEO 7: 65, 96, 62, 255, 53, 154
  # VIDEO 8: 61, 125, 60, 200, 34, 151
- # VIDEO 9: 52, 89, 48, 161, 49, 141
- # VIDEO 10: 60, 87, 44, 169, 66, 128
- # VIDEO 11: 66, 89, 46, 184, 24, 175
- # VIDEO 12: 65, 102, 41, 176, 64, 146
- # VIDEO 13: 70, 103, 28, 255, 4, 200
- # VIDEO 14: 52, 86, 31, 255, 40, 255
- # VIDEO 15: 57, 100, 40, 255, 40, 255
- # VIDEO 15 MEJORADO: 68, 79, 61, 255, 29, 111
- # VIDEO 21: 61, 89, 42, 158, 10, 125
- # VIDEO 22: 67, 90, 85, 195, 36, 110
- # VIDEO 23: 63, 87, 71, 185, 41, 120
- # VIDEO 24: 65, 83, 40, 121, 37, 108
+ # VIDEO 9: 10, 40, 55, 175, 23, 92
  # AMARILLO
  # VIDEO 16: 0, 27, 26, 200, 76, 255
  # VIDEO 17: NO GUSTA
@@ -48,7 +35,7 @@ ERROR = 50
 DIFF = H/7
 
 #cam = cv2.VideoCapture(0)
-cam = cv2.VideoCapture("/home/chikitovivas/Descargas/Python-control-dron/drone/Videos/Video30.avi")
+cam = cv2.VideoCapture("/home/chikitovivas/Descargas/Python-control-dron/drone/Videos/Video9.avi")
 
 def nothing(x):
     pass

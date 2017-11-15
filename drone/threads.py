@@ -38,10 +38,10 @@ def controller():
         automatic = F.controller(automatic)
         if G.vision_var and automatic:
             #F.followLineSpin()
-            F.followLineSpinContinuos()
-            #F.followLineSpinContinuosNOSTOP()
+            #F.followLineSpinContinuos()
+            F.followLineSpinContinuosNOSTOP()
             once = False
-        #if G.JOY.Back():   running =   False
+        if G.JOY.Back():   running =   False
 
     print("Terminando hilo de control....")
 

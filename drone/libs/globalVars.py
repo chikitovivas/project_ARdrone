@@ -27,7 +27,7 @@ def init():
     global SCREENMIDY, SCREENMIDX, DIFF, MX, MY                        # Punto medio en Y, Punto medio en X, Cantidad de circulos
     SCREENMIDX,SCREENMIDY, DIFF, MX, MY = W/2, H/2, H/7, (W/2 * 100) / W, (H/2 * 100) / H
     global RADIUSCENTER                                         # Radio del circulo central de la camara
-    RADIUSCENTER = 220
+    RADIUSCENTER = 150
     #
     global FLAG_LEFTX,FLAG_LEFTY,FLAG_RIGHTX,FLAG_RIGHTY        # Banderas
     FLAG_LEFTX,FLAG_LEFTY,FLAG_RIGHTX,FLAG_RIGHTY = False,False,False,False
@@ -106,6 +106,9 @@ def init():
 
     global H_MIN_A, H_MAX_A, S_MIN_A, S_MAX_A, V_MIN_A, V_MAX_A
     H_MIN_A, H_MAX_A, S_MIN_A, S_MAX_A, V_MIN_A, V_MAX_A = 16, 32, 66, 228, 110, 255
+
+    global H_MIN_A_NOCHE, H_MAX_A_NOCHE, S_MIN_A_NOCHE, S_MAX_A_NOCHE, V_MIN_A_NOCHE, V_MAX_A_NOCHE
+    H_MIN_A_NOCHE, H_MAX_A_NOCHE, S_MIN_A_NOCHE, S_MAX_A_NOCHE, V_MIN_A_NOCHE, V_MAX_A_NOCHE = 10, 40, 55, 175, 23, 92
 
 
  # VIDEO 15 MEJORADO: 68, 79, 61, 255, 29, 111

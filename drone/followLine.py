@@ -25,7 +25,7 @@ def run():
     seconds = time.localtime().tm_sec
     once = True
     kernel = np.ones((3,3   ),np.uint8)
-    cap = cv2.VideoCapture("Videos/Video21.avi")
+    cap = cv2.VideoCapture("Videos/Video9.avi")
 
     #Mientras no se mande a parar
     while not stop :
@@ -52,23 +52,10 @@ def run():
                 _,tresh = cv2.threshold(gray, 60, 255, cv2.THRESH_BINARY)    #Filtro de blanco y negro
 
                 tresh_vasos = [tresh[(G.H/3):2*(G.H/3),0:G.W]]
-                error_min = 0
-                error_max = 0
                 frame = F.detection(frame,tresh_vasos)         #Vasos a detectar
-                """mask = cv2.inRange(HSV, np.array([G.H_MIN_1,G.S_MIN_1,G.V_MIN_1]), np.array([G.H_MAX_1,G.S_MAX_1,G.V_MAX_1])) +
-                        cv2.inRange(HSV, np.array([G.H_MIN_2,G.S_MIN_2,G.V_MIN_2]), np.array([G.H_MAX_2,G.S_MAX_2,G.V_MAX_2])) +
-                        cv2.inRange(HSV, np.array([G.H_MIN_3,G.S_MIN_3,G.V_MIN_3]), np.array([G.H_MAX_3,G.S_MAX_3,G.V_MAX_3])) +
-                        cv2.inRange(HSV, np.array([G.H_MIN_4,G.S_MIN_4,G.V_MIN_4]), np.array([G.H_MAX_4,G.S_MAX_4,G.V_MAX_4])) +
-                        cv2.inRange(HSV, np.array([G.H_MIN_5,G.S_MIN_5,G.V_MIN_5]), np.array([G.H_MAX_5,G.S_MAX_5,G.V_MAX_5])) +
-                        cv2.inRange(HSV, np.array([G.H_MIN_6,G.S_MIN_6,G.V_MIN_6]), np.array([G.H_MAX_6,G.S_MAX_6,G.V_MAX_6])) +
-                        cv2.inRange(HSV, np.array([G.H_MIN_7,G.S_MIN_7,G.V_MIN_7]), np.array([G.H_MAX_7,G.S_MAX_7,G.V_MAX_7])) +
-                        cv2.inRange(HSV, np.array([G.H_MIN_8,G.S_MIN_8,G.V_MIN_8]), np.array([G.H_MAX_8,G.S_MAX_8,G.V_MAX_8])) +
-                        cv2.inRange(HSV, np.array([G.H_MIN_9,G.S_MIN_9,G.V_MIN_9]), np.array([G.H_MAX_9,G.S_MAX_9,G.V_MAX_9])) +
-                        cv2.inRange(HSV, np.array([G.H_MIN_10,G.S_MIN_10,G.V_MIN_10]), np.array([G.H_MAX_10,G.S_MAX_10,G.V_MAX_10])) +
-                        cv2.inRange(HSV, np.array([G.H_MIN_11,G.S_MIN_11,G.V_MIN_11]), np.array([G.H_MAX_11,G.S_MAX_11,G.V_MAX_11])) +
-                        cv2.inRange(HSV, np.array([G.H_MIN_12,G.S_MIN_12,G.V_MIN_12]), np.array([G.H_MAX_12,G.S_MAX_12,G.V_MAX_12]))"""
-                if len(sys.argv) < 3 or sys.argv[len(sys.argv) - 1].lower() == 'verde':
-                    mask = cv2.inRange(HSV, np.array([G.H_MIN_2 - error_min,G.S_MIN_2 - error_min,G.V_MIN_2 - error_min]), np.array([G.H_MAX_2 + error_max,G.S_MAX_2 + error_max,G.V_MAX_2 + error_max]))
+
+                if sys.argv[len(sys.argv) - 1].lower() == 'noche':
+                    mask = cv2.inRange(HSV, np.array([G.H_MIN_A_NOCHE,G.S_MIN_A_NOCHE,G.V_MIN_A_NOCHE]), np.array([G.H_MAX_A_NOCHE,G.S_MAX_A_NOCHE,G.V_MAX_A_NOCHE]))
                     output = cv2.bitwise_and(frame, frame, mask = mask)
 
                     erode = cv2.erode(output, kernel, iterations=1)

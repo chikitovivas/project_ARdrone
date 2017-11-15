@@ -157,20 +157,20 @@ def drawLineCHANGE(frame,dilate):
     find = False
 
     contours, hierarchy = cv2.findContours(dilate, cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE) #Frame de la camara completa
-    cv2.drawContours(frame,contours, -1, (0, 255, 0), 1)
+    cv2.drawContours(frame,contours, -1, (0, 255, 0), 3)
 
     cv2.line(frame, (G.SCREENMIDX, 0), (G.SCREENMIDX, G.H), (0,255,0),2)    #LINEA VERTICAL MEDIO VERDE
 
     cv2.line(frame,(G.SCREENMIDX,G.H),((G.W * 10/ 100),0), (0,0,255),1)    #LINEA de angulos izquierda
     cv2.line(frame,(G.SCREENMIDX,G.H),((G.W * 90/ 100),0), (0,0,255),1)    #LINEA de angulos derecha
-    cv2.line(frame,(G.SCREENMIDX - G.RADIUSCENTER, (G.H * 1) / 3),(G.SCREENMIDX - G.RADIUSCENTER, (G.H * 2) / 3), (0,0,255),1)  #LINEA delimitadora izquierda
-    cv2.line(frame,(G.SCREENMIDX + G.RADIUSCENTER, (G.H * 1) / 3),(G.SCREENMIDX + G.RADIUSCENTER, (G.H * 2) / 3), (0,0,255),1)  #LINEA delimitadora derecha
+    cv2.line(frame,(G.SCREENMIDX - G.RADIUSCENTER, 0),(G.SCREENMIDX - G.RADIUSCENTER, G.H), (0,0,255),1)  #LINEA delimitadora izquierda
+    cv2.line(frame,(G.SCREENMIDX + G.RADIUSCENTER, 0),(G.SCREENMIDX + G.RADIUSCENTER, G.H), (0,0,255),1)  #LINEA delimitadora derecha
 
     if (len(contours) != 0):
         top, bot, left, right, flag = findEdge(contours)
         if flag:
-            cv2.line(frame, (G.SCREENMIDX, G.SCREENMIDY), (bot), (127,0,255),2)
-            cv2.line(frame, (G.SCREENMIDX, G.SCREENMIDY), (top), (127,0,255),2)
+            cv2.line(frame, (G.SCREENMIDX, G.H), (bot), (127,0,255),2)
+            cv2.line(frame, (G.SCREENMIDX, G.H), (top), (127,0,255),2)
             cv2.line(frame, (0, top[1]), (G.W, top[1]), (0,255,0),2)
             cv2.circle(frame, (left), 3, (127,0,255),2)
             cv2.circle(frame, (right), 3, (127,0,255),2)
@@ -223,7 +223,7 @@ def drawLine(frame, array_tresh):
                     for i in range(1, 5):
                         cv2.circle(frame, (G.SCREENMIDX, G.SCREENMIDY), G.RADIUSCENTER*i,(0,255,0),2) ##(,(),G.RADIUSCENTER,(),)
                     if cont == 1:
-                        cv2.line(frame, (G.SCREENMIDX, G.SCREENMIDY), (topmost), (127,0,255),2)
+                        cv2.line(frame, (G.SCREENMIDX, G.H), (topmost), (127,0,255),2)
                         center[cont] = topmost
                     else:
                         cv2.line(frame, (G.SCREENMIDX, G.SCREENMIDY), (x_center,y_center), (127,0,255),2)
@@ -354,8 +354,8 @@ def followLineSpinContinuos():
     horizontal = 0.0
     vertical = 0.0
     frente = 0.0
-    var_giro = 0.2
-    Kp = 0.1
+    var_giro = 0.3
+    Kp = 0.2
     Kp_frente = 0.05
     Ki = 0
     Kd = 0
@@ -445,6 +445,7 @@ def followLineSpinContinuosNOSTOP():
     vertical = 0.0
     frente = 0.0
     Kp = 0.1
+    Kp_giro = 0.2
     Kp_frente = 0.1
     Ki = 0
     Kd = 0
@@ -454,7 +455,7 @@ def followLineSpinContinuosNOSTOP():
     if (G.SCREENMIDX - G.RADIUSCENTER) < G.FULL[0][0] < (G.SCREENMIDX + G.RADIUSCENTER):
         horizontal = ((Kp + Ki + Kd) * 0) / G.SCREENMIDX
         print("               |=============================|")
-        print "               |       SEGUIR DERECHO        |"
+        print "               |       SEGUIR RECTO          |"
         print("               |-----------------------------|")
 
     # En el eje de las x (Horizontal) -> Note: Inverse
@@ -479,15 +480,20 @@ def followLineSpinContinuosNOSTOP():
     if(G.FULL[0] != []) :
         grados_error = gradosPoint(G.FULL[0])
         if grados_error >= 0:
-            giro = float ((grados_error * (Kp + Ki + Kd)) / 60.00)
+            frente = Kp_frente
+            if grados_error >= 36:
+                frente = Kp_frente / 2
+            giro = float ((grados_error * (Kp_giro + Ki + Kd)) / 90.00)
             frente = Kp_frente
             print "               |       GIRO DE DERECHA       |"
             print("               |-----------------------------|")
             print "               |       GRADOS: %.3f" % grados_error + "       |"
             print("               |=============================|")
         elif grados_error < 0:
-            giro = float ((grados_error * (Kp + Ki + Kd)) / 60.00)
             frente = Kp_frente
+            if grados_error <= -36:
+                frente = Kp_frente / 2
+            giro = float ((grados_error * (Kp_giro + Ki + Kd)) / 90.00)
             print "               |       GIRO DE IZQUIERDA     |"
             print("               |-----------------------------|")
             print "               |       GRADOS: %.3f" % grados_error + "       |"
@@ -495,8 +501,8 @@ def followLineSpinContinuosNOSTOP():
 
     #Movimiento, hacer un flag para que no mande mismos movimientos
     G.DRONE.move(horizontal,frente,vertical,giro)
-
     print("               |   VARIABLES DE MOVIMIENTO   |")
+    print("               |-------X: "+str(G.FULL[0][0])+"  Y: "+str(G.FULL[0][1])+"--------|")
     print("               |-----------------------------|")
     if frente >= 0:
         print("               |     FRENTE: " + str(frente)) + "             |"
@@ -550,7 +556,7 @@ def gradosPoint(punto):
     line_y = (punto[1] * 100.0) / G.H
     #Pendiente de la linea
     if (line_x - G.MX) != 0:
-        line_m = (line_y - G.MY) / (line_x - G.MX)
+        line_m = (line_y - (G.MY + G.MY)) / (line_x - G.MX)
     else:
         return 0
 
