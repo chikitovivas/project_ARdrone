@@ -444,9 +444,9 @@ def followLineSpinContinuosNOSTOP():
     horizontal = 0.0
     vertical = 0.0
     frente = 0.0
-    Kp = 0.1
-    Kp_giro = 0.2
-    Kp_frente = 0.1
+    Kp = 0.05        #1
+    Kp_giro = 0.2    #3
+    Kp_frente = 0.1  #2
     Ki = 0
     Kd = 0
 
@@ -522,7 +522,10 @@ def followLineSpinContinuosNOSTOP():
         print("               |     GIRO: %.3f" % giro + "            |")
     print("               |=============================| \n\n\n\n")
 
-    time.sleep(0.5)
+    time.sleep(0.1)
+    #time.sleep(1)
+    #G.DRONE.stop()
+    #time.sleep(1)
 
 def timePass(flagTime,seconds):
     secondsWait = 5

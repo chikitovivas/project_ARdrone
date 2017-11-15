@@ -153,5 +153,6 @@ def run():
     #out.release()
     cv2.destroyAllWindows()
     G.DRONE.land()
+    G.DRONE.shutdown()
     G.JOY.close()
     print "Terminado."
